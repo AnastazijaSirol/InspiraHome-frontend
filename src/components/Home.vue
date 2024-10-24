@@ -134,13 +134,41 @@ export default {
       this.isAuthenticated = false;
       alert('Logged out successfully!');
     },
-    confirmSelection() {
-      if (this.selectedStyle && this.selectedRoom && this.selectedColor) {
-        this.$router.push('/about');
-      } else {
-        alert('Please select a style, room, and color before confirming.');
+    async confirmSelection() {
+    if (this.selectedStyle && this.selectedRoom && this.selectedColor) {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please log in to save your selection.');
+        return;
       }
+
+      try {
+        const response = await fetch('http://localhost:3000/api/history', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token,  
+          },
+          body: JSON.stringify({
+            style: this.selectedStyle,
+            room: this.selectedRoom,
+            color: this.selectedColor,
+          }),
+        });
+
+        if (response.ok) {
+          alert('Selection saved!');
+          this.$router.push('/about');
+        } else {
+          alert('Failed to save selection.');
+        }
+      } catch (error) {
+        alert('Error saving selection.');
+      }
+    } else {
+      alert('Please select a style, room, and color before confirming.');
     }
+  }
   }
 };
 </script>
