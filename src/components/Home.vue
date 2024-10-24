@@ -135,7 +135,11 @@ export default {
       alert('Logged out successfully!');
     },
     confirmSelection() {
-      this.$router.push('/about');
+      if (this.selectedStyle && this.selectedRoom && this.selectedColor) {
+        this.$router.push('/about');
+      } else {
+        alert('Please select a style, room, and color before confirming.');
+      }
     }
   }
 };
@@ -179,7 +183,7 @@ export default {
 .logout-btn:hover {
   background-color: #ff2e00;
 }
-  
+
 .header-dropdown {
   position: relative;
   display: inline-block;
