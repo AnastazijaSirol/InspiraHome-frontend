@@ -1,8 +1,20 @@
 <template>
   <div id="app">
     <div class="content">
-      <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">Log Out</button>
-
+      <div class="header-menu">
+        <div v-if="isAuthenticated" class="header-dropdown">
+          <button class="header-dropdown-btn">Menu</button>
+          <div class="header-dropdown-content">
+            <a href="/">Home</a>
+            <a href="/profile">Profile</a>
+            <a href="/group-chats">Group Chats</a>
+            <a href="/designers">Designers</a>
+            <a href="/competitions">Competitions</a>
+            <a href="/quiz">Quiz</a>
+          </div>
+        </div>
+        <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">Log Out</button>
+      </div>
       <h1 class="title">InspiraHome</h1>
       <h1>Let your creativity shine! Choose a style and get inspired.</h1>
 
@@ -62,43 +74,43 @@
 </template>
 
 <script>
-import { signup, login } from '../api'; 
+import { signup, login } from '../api';
 
 export default {
   name: 'HomePage',
   data() {
     return {
-      isLogin: true,  
-      isAuthenticated: false, 
+      isLogin: true,
+      isAuthenticated: false,
       username: '',
       email: '',
       password: '',
-      styleOptions: ['Modern', 'Minimalistic', 'Vintage', 'Boho', 'Scandinavian', 'Traditional'],  
-      roomOptions: ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Office', 'Hallway'],  
-      colorOptions: ['Red', 'Blue', 'Green', 'Yellow', 'Beige', 'White', 'Black', 'Orange', 'Brown'], 
-      selectedStyle: '',  
-      selectedRoom: '',   
+      styleOptions: ['Any style', 'Modern', 'Minimalistic', 'Vintage', 'Boho', 'Scandinavian', 'Traditional'],
+      roomOptions: ['Any room', 'Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Office', 'Hallway'],
+      colorOptions: ['Any color','Red', 'Blue', 'Green', 'Yellow', 'Beige', 'White', 'Black', 'Orange', 'Brown'],
+      selectedStyle: '',
+      selectedRoom: '',
       selectedColor: ''
     };
   },
   mounted() {
     const token = localStorage.getItem('token');
     if (token) {
-      this.isAuthenticated = true; 
+      this.isAuthenticated = true;
     }
   },
   methods: {
     toggleForm() {
-      this.isLogin = !this.isLogin; 
+      this.isLogin = !this.isLogin;
     },
     async handleSignup() {
       try {
-        await signup(this.username, this.email, this.password); 
+        await signup(this.username, this.email, this.password);
         alert('User registered successfully!');
-        this.username = ''; 
+        this.username = '';
         this.email = '';
-        this.password = ''; 
-        this.isAuthenticated = true; 
+        this.password = '';
+        this.isAuthenticated = true;
       } catch (error) {
         console.error('Error during signup:', error.response.data);
         alert('Signup failed: ' + error.response.data);
@@ -106,26 +118,26 @@ export default {
     },
     async handleLogin() {
       try {
-        const response = await login(this.email, this.password); 
-        localStorage.setItem('token', response.token); 
+        const response = await login(this.email, this.password);
+        localStorage.setItem('token', response.token);
         alert('Login successful!');
-        this.email = ''; 
+        this.email = '';
         this.password = '';
-        this.isAuthenticated = true; 
+        this.isAuthenticated = true;
       } catch (error) {
         console.error('Error during login:', error.response.data);
         alert('Login failed: ' + error.response.data);
       }
     },
     handleLogout() {
-      localStorage.removeItem('token'); 
-      this.isAuthenticated = false; 
+      localStorage.removeItem('token');
+      this.isAuthenticated = false;
       alert('Logged out successfully!');
     },
     confirmSelection() {
       this.$router.push('/about');
     }
-  },
+  }
 };
 </script>
 
@@ -135,79 +147,24 @@ export default {
   z-index: 1;
   color: white;
   display: flex;
-  flex-direction: column; 
-  align-items: center; 
-  justify-content: center; 
-  height: 100vh; 
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
 }
 
-.form-container {
-  display: flex; 
-  flex-direction: column; 
-  background-color: rgba(0, 0, 0, 0.6); 
-  border-radius: 8px; 
-  padding: 20px; 
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); 
-  width: 400px; 
-  margin-top: 20px; 
-}
-
-.form {
+.header-menu {
   display: flex;
-  flex-direction: column; 
-  gap: 15px; 
-}
-
-input {
-  padding: 10px; 
-  border: none; 
-  border-radius: 4px;
-  outline: none; 
-  margin-left:10px;
-}
-
-button {
-  padding: 10px; 
-  border: none; 
-  border-radius: 4px; 
-  background-color: #FFA500; 
-  color: white; 
-  cursor: pointer; 
-  margin-top: 20px; 
-  margin-right: 5px;
-  margin-left: 10px;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #ff8c00; 
-}
-
-.switch-text {
-  color: #FFA500; 
-  text-decoration: underline;
-  cursor: pointer; 
-  margin-top: 20px; 
-  transition: color 0.3s; 
-}
-
-.switch-text:hover {
-  color: #ff8c00; 
-}
-
-.title {
-  font-size: 60px;
-  color: #FFA500;
-  text-shadow: 
-    2px 2px 0 rgba(0, 0, 0, 0.7), 
-    4px 4px 0 rgba(0, 0, 0, 0.5), 
-    6px 6px 0 rgba(0, 0, 0, 0.3);
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 10px;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .logout-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
   padding: 10px 20px;
   background-color: #FF4500;
   color: white;
@@ -216,10 +173,116 @@ button:hover {
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s;
+  margin-right: 20px;
 }
 
 .logout-btn:hover {
   background-color: #ff2e00;
+}
+  
+.header-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.header-dropdown-btn {
+  padding: 10px 20px;
+  background-color: #FFA500;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.header-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.header-dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.header-dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.header-dropdown:hover .header-dropdown-content {
+  display: block;
+}
+
+.header-dropdown:hover .header-dropdown-btn {
+  background-color: #ff8c00;
+}
+
+.title {
+  font-size: 60px;
+  color: #FFA500;
+  text-shadow:
+    2px 2px 0 rgba(0, 0, 0, 0.7),
+    4px 4px 0 rgba(0, 0, 0, 0.5),
+    6px 6px 0 rgba(0, 0, 0, 0.3);
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  width: 400px;
+  margin-top: 20px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+input {
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  outline: none;
+  margin-left: 10px;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background-color: #FFA500;
+  color: white;
+  cursor: pointer;
+  margin-top: 20px;
+  margin-right: 5px;
+  margin-left: 10px;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #ff8c00;
+}
+
+.switch-text {
+  color: #FFA500;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: color 0.3s;
+}
+
+.switch-text:hover {
+  color: #ff8c00;
 }
 
 .dropdown-container {
@@ -263,6 +326,6 @@ select {
 }
 
 .confirm-button:hover {
-  background-color: #28a428; 
+  background-color: #28a428;
 }
 </style>
