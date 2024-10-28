@@ -1,5 +1,20 @@
 <template>
   <div>
+    <div class="header-menu">
+      <div v-if="isAuthenticated" class="header-dropdown">
+        <button class="header-dropdown-btn">Menu</button>
+        <div class="header-dropdown-content">
+          <a href="/">Home</a>
+          <a href="/profile">Profile</a>
+          <a href="/group-chats">Group Chats</a>
+          <a href="/designers">Designers</a>
+          <a href="/competitions">Competitions</a>
+          <a href="/quiz">Quiz</a>
+        </div>
+      </div>
+      <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">Log Out</button>
+    </div>
+
     <h1 class="white-text">Inspirations</h1>
     <div v-if="isLoading" class="loading">
       <p class="white-text">Generating your image, please wait...</p>
@@ -32,15 +47,20 @@ export default {
   data() {
     return {
       image: null,
-      isLoading: false, 
+      isLoading: false,
+      isAuthenticated: false, 
     };
   },
   mounted() {
     this.fetchImage();
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.isAuthenticated = true;
+    }
   },
   methods: {
     async fetchImage() {
-      this.isLoading = true; 
+      this.isLoading = true;
       try {
         const token = localStorage.getItem('token');
         const generateResponse = await fetch(`http://localhost:3000/api/images`, {
@@ -54,35 +74,40 @@ export default {
         if (!generateResponse.ok) {
           const errorData = await generateResponse.json();
           console.error('Failed to generate image', errorData);
-          return; 
+          return;
         }
 
         const generateData = await generateResponse.json();
-        this.image = generateData.image; 
-        
+        this.image = generateData.image;
       } catch (error) {
         console.error('Error fetching image:', error);
       } finally {
-        this.isLoading = false; 
+        this.isLoading = false;
       }
     },
     async downloadImage() {
       try {
-        const response = await axios.get(this.image, { responseType: 'blob' }); 
-        const url = URL.createObjectURL(new Blob([response.data])); 
+        const response = await axios.get(this.image, { responseType: 'blob' });
+        const url = URL.createObjectURL(new Blob([response.data]));
 
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', 'inspiration.png'); 
-        
+        link.setAttribute('download', 'inspiration.png');
+
         document.body.appendChild(link);
-        link.click(); 
-        document.body.removeChild(link); 
-        
-        URL.revokeObjectURL(url); 
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
       } catch (error) {
         console.error('Failed to download image:', error);
       }
+    },
+    handleLogout() {
+      localStorage.removeItem('token');
+      this.isAuthenticated = false;
+      alert('Logged out successfully!');
+      this.$router.push('/'); 
     },
   },
 };
@@ -93,6 +118,75 @@ export default {
   color: #f3f3f3;
   font-family: Arial, sans-serif;
   text-align: center;
+}
+
+.header-menu {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 10px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.logout-btn {
+  padding: 10px 20px;
+  background-color: #FF4500;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+  margin-right: 20px;
+}
+
+.logout-btn:hover {
+  background-color: #ff2e00;
+}
+
+.header-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.header-dropdown-btn {
+  padding: 10px 20px;
+  background-color: #FFA500;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.header-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.header-dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.header-dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.header-dropdown:hover .header-dropdown-content {
+  display: block;
+}
+
+.header-dropdown:hover .header-dropdown-btn {
+  background-color: #ff8c00;
 }
 
 .image-gallery {
@@ -157,7 +251,7 @@ export default {
 }
 
 .spinner {
-  border: 5px solid rgba(255, 255, 255, 0.3); 
+  border: 5px solid rgba(255, 255, 255, 0.3);
   border-top: 5px solid #4a90e2;
   border-radius: 50%;
   width: 40px;
