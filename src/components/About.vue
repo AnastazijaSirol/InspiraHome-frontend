@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- Header Section -->
     <div class="header-menu">
       <div v-if="isAuthenticated" class="header-dropdown">
         <button class="header-dropdown-btn">Menu</button>
@@ -22,6 +23,7 @@
     </div>
     <div v-else-if="image">
       <h2 class="white-text">Inspirational Image</h2>
+      <p class="prompt-text"> {{ prompt }}</p> 
       <div class="image-gallery">
         <div class="image-item">
           <img :src="image" alt="Inspiration" />
@@ -46,8 +48,9 @@ export default {
   name: 'AboutPage',
   data() {
     return {
-      image: null,
-      isLoading: false,
+      image: null, 
+      prompt: '', 
+      isLoading: false, 
       isAuthenticated: false, 
     };
   },
@@ -79,12 +82,14 @@ export default {
 
         const generateData = await generateResponse.json();
         this.image = generateData.image;
+        this.prompt = generateData.prompt; 
       } catch (error) {
         console.error('Error fetching image:', error);
       } finally {
         this.isLoading = false;
       }
     },
+   
     async downloadImage() {
       try {
         const response = await axios.get(this.image, { responseType: 'blob' });
@@ -103,11 +108,12 @@ export default {
         console.error('Failed to download image:', error);
       }
     },
+    
     handleLogout() {
       localStorage.removeItem('token');
       this.isAuthenticated = false;
       alert('Logged out successfully!');
-      this.$router.push('/'); 
+      this.$router.push('/');
     },
   },
 };
@@ -133,7 +139,7 @@ export default {
 
 .logout-btn {
   padding: 10px 20px;
-  background-color: #FF4500;
+  background-color: #ff4500;
   color: white;
   border: none;
   border-radius: 5px;
@@ -154,7 +160,7 @@ export default {
 
 .header-dropdown-btn {
   padding: 10px 20px;
-  background-color: #FFA500;
+  background-color: #ffa500;
   color: white;
   border: none;
   border-radius: 5px;
@@ -263,5 +269,13 @@ export default {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.prompt-text {
+  color: #e0e0e0;
+  font-size: 1rem;
+  margin: 10px 0;
+  text-align: center;
+  font-family: Arial, sans-serif;
 }
 </style>
