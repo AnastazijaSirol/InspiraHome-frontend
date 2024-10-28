@@ -1,10 +1,10 @@
 <template>
   <div>
     <h1>About Page</h1>
-    <div v-if="images.length">
-      <h2>Inspirational Images</h2>
+    <div v-if="image">
+      <h2>Inspirational Image</h2>
       <div class="image-gallery">
-        <div v-for="image in images" :key="image" class="image-item">
+        <div class="image-item">
           <img :src="image" alt="Inspiration" />
         </div>
       </div>
@@ -20,49 +20,46 @@ export default {
   name: 'AboutPage',
   data() {
     return {
-      images: [],
-      selectedStyle: localStorage.getItem('selectedStyle'),
-      selectedRoom: localStorage.getItem('selectedRoom'),
-      selectedColor: localStorage.getItem('selectedColor'),
+      image: null,
     };
   },
   mounted() {
-    this.fetchImages();
+    this.fetchImage();
   },
   methods: {
-    async fetchImages() {
+    async fetchImage() {
       try {
-        const response = await fetch('http://localhost:3000/api/images', {
+        const token = localStorage.getItem('token');
+        console.log('Retrieved token:', token);
+
+        const generateResponse = await fetch(`http://localhost:3000/api/images`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            style: this.selectedStyle,
-            room: this.selectedRoom,
-            color: this.selectedColor,
-          }),
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          this.images = data.images.slice(0, 3); 
-        } else {
-          console.error('Failed to fetch images');
+        if (!generateResponse.ok) {
+          const errorData = await generateResponse.json();
+          console.error('Failed to generate image', errorData);
+          return; 
         }
+
+        const generateData = await generateResponse.json();
+        this.image = generateData.image; 
+        
       } catch (error) {
-        console.error('Error fetching images:', error);
+        console.error('Error fetching image:', error);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style>
 .image-gallery {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
   justify-content: center;
 }
 
