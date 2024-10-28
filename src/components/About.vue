@@ -1,12 +1,12 @@
 <template>
   <div>
-    <h1>About Page</h1>
+    <h1 class="white-text">Inspirations</h1>
     <div v-if="isLoading" class="loading">
-      <p>Generating your image, please wait...</p>
+      <p class="white-text">Generating your image, please wait...</p>
       <div class="spinner"></div>
     </div>
     <div v-else-if="image">
-      <h2>Inspirational Image</h2>
+      <h2 class="white-text">Inspirational Image</h2>
       <div class="image-gallery">
         <div class="image-item">
           <img :src="image" alt="Inspiration" />
@@ -14,7 +14,7 @@
       </div>
     </div>
     <div v-else>
-      <p>No images found based on your selection.</p>
+      <p class="white-text">No images found based on your selection.</p>
     </div>
   </div>
 </template>
@@ -66,13 +66,18 @@ export default {
 </script>
 
 <style>
+
+.white-text {
+  color: white;
+}
+
 .image-gallery {
   display: flex;
   justify-content: center;
 }
 
 .image-item img {
-  max-width: 200px;
+  max-width: 600px; 
   height: auto;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
