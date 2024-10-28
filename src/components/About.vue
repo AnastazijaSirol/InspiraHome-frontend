@@ -12,7 +12,6 @@
           <img :src="image" alt="Inspiration" />
         </div>
       </div>
-      <!-- Custom download button below the image -->
       <div class="download-container">
         <button @click="downloadImage" class="download-button">
           <i class="download-icon">&#x21E9;</i> Download Image
