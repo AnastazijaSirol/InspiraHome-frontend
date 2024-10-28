@@ -144,17 +144,18 @@ export default {
 
       try {
         const response = await fetch('http://localhost:3000/api/history', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token,  
-          },
-          body: JSON.stringify({
-            style: this.selectedStyle,
-            room: this.selectedRoom,
-            color: this.selectedColor,
-          }),
-        });
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,  
+        },
+        body: JSON.stringify({
+          style: this.selectedStyle,
+          room: this.selectedRoom,
+          color: this.selectedColor,
+        }),
+      });
+
 
         if (response.ok) {
           alert('Selection saved!');
