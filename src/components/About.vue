@@ -1,7 +1,11 @@
 <template>
   <div>
     <h1>About Page</h1>
-    <div v-if="image">
+    <div v-if="isLoading" class="loading">
+      <p>Generating your image, please wait...</p>
+      <div class="spinner"></div>
+    </div>
+    <div v-else-if="image">
       <h2>Inspirational Image</h2>
       <div class="image-gallery">
         <div class="image-item">
@@ -21,6 +25,7 @@ export default {
   data() {
     return {
       image: null,
+      isLoading: false, 
     };
   },
   mounted() {
@@ -28,6 +33,7 @@ export default {
   },
   methods: {
     async fetchImage() {
+      this.isLoading = true; 
       try {
         const token = localStorage.getItem('token');
         console.log('Retrieved token:', token);
@@ -51,6 +57,8 @@ export default {
         
       } catch (error) {
         console.error('Error fetching image:', error);
+      } finally {
+        this.isLoading = false; 
       }
     },
   },
@@ -68,5 +76,25 @@ export default {
   height: auto;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.spinner {
+  border: 8px solid #f3f3f3; 
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
