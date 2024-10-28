@@ -85,9 +85,9 @@ export default {
       username: '',
       email: '',
       password: '',
-      styleOptions: ['Any style', 'Modern', 'Minimalistic', 'Vintage', 'Boho', 'Scandinavian', 'Traditional'],
-      roomOptions: ['Any room', 'Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Office', 'Hallway'],
-      colorOptions: ['Any color','Red', 'Blue', 'Green', 'Yellow', 'Beige', 'White', 'Black', 'Orange', 'Brown'],
+      styleOptions: ['Any', 'Modern', 'Minimalistic', 'Vintage', 'Boho', 'Scandinavian', 'Traditional'],
+      roomOptions: ['Any', 'Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Office', 'Hallway'],
+      colorOptions: ['Any','Red', 'Blue', 'Green', 'Yellow', 'Beige', 'White', 'Black', 'Orange', 'Brown'],
       selectedStyle: '',
       selectedRoom: '',
       selectedColor: ''
