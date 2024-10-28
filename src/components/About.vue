@@ -12,6 +12,12 @@
           <img :src="image" alt="Inspiration" />
         </div>
       </div>
+      <!-- Custom download button below the image -->
+      <div class="download-container">
+        <button @click="downloadImage" class="download-button">
+          <i class="download-icon">&#x21E9;</i> Download Image
+        </button>
+      </div>
     </div>
     <div v-else>
       <p class="white-text">No images found based on your selection.</p>
@@ -20,6 +26,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'AboutPage',
   data() {
@@ -36,8 +44,6 @@ export default {
       this.isLoading = true; 
       try {
         const token = localStorage.getItem('token');
-        console.log('Retrieved token:', token);
-
         const generateResponse = await fetch(`http://localhost:3000/api/images`, {
           method: 'POST',
           headers: {
@@ -61,41 +67,104 @@ export default {
         this.isLoading = false; 
       }
     },
+    async downloadImage() {
+      try {
+        const response = await axios.get(this.image, { responseType: 'blob' }); 
+        const url = URL.createObjectURL(new Blob([response.data])); 
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'inspiration.png'); 
+        
+        document.body.appendChild(link);
+        link.click(); 
+        document.body.removeChild(link); 
+        
+        URL.revokeObjectURL(url); 
+      } catch (error) {
+        console.error('Failed to download image:', error);
+      }
+    },
   },
 };
 </script>
 
 <style>
-
 .white-text {
-  color: white;
+  color: #f3f3f3;
+  font-family: Arial, sans-serif;
+  text-align: center;
 }
 
 .image-gallery {
   display: flex;
   justify-content: center;
+  margin-top: 20px;
 }
 
 .image-item img {
-  max-width: 600px; 
+  max-width: 500px;
   height: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.image-item img:hover {
+  transform: scale(1.03);
+}
+
+.download-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.download-button {
+  display: flex;
+  align-items: center;
+  background-color: #4a90e2;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.download-button:hover {
+  background-color: #3b7bbf;
+  transform: translateY(-2px);
+}
+
+.download-button:active {
+  background-color: #34689c;
+  transform: translateY(0);
+}
+
+.download-icon {
+  font-size: 18px;
+  margin-right: 8px;
 }
 
 .loading {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 30px;
 }
 
 .spinner {
-  border: 8px solid #f3f3f3; 
-  border-top: 8px solid #3498db;
+  border: 5px solid rgba(255, 255, 255, 0.3); 
+  border-top: 5px solid #4a90e2;
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
+  margin-top: 10px;
 }
 
 @keyframes spin {
