@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Header Section -->
     <div class="header-menu">
       <div v-if="isAuthenticated" class="header-dropdown">
         <button class="header-dropdown-btn">Menu</button>
