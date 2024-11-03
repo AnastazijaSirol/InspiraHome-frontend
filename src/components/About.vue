@@ -4,12 +4,12 @@
       <div v-if="isAuthenticated" class="header-dropdown">
         <button class="header-dropdown-btn">Menu</button>
         <div class="header-dropdown-content">
-          <a href="/">Home</a>
-          <a href="/profile">Profile</a>
-          <a href="/group-chats">Group Chats</a>
-          <a href="/designers">Designers</a>
-          <a href="/competitions">Competitions</a>
-          <a href="/quiz">Quiz</a>
+          <button @click="navigateTo('/')">Home</button>
+          <button @click="navigateTo('/profile')">Profile</button>
+          <button @click="navigateTo('/group-chats')">Group Chats</button>
+          <button @click="navigateTo('/designers')">Designers</button>
+          <button @click="navigateTo('/competitions')">Competitions</button>
+          <button @click="navigateTo('/quiz')">Quiz</button>
         </div>
       </div>
       <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">Log Out</button>
@@ -51,6 +51,7 @@ export default {
       prompt: '', 
       isLoading: false, 
       isAuthenticated: false, 
+      isLiked: false,
     };
   },
   mounted() {
@@ -114,6 +115,11 @@ export default {
       alert('Logged out successfully!');
       this.$router.push('/');
     },
+
+    navigateTo(route) {
+      this.$router.push(route);
+    },
+
   },
 };
 </script>
@@ -158,40 +164,59 @@ export default {
 }
 
 .header-dropdown-btn {
-  padding: 10px 20px;
-  background-color: #ffa500;
+  background-color: #FFA500;
   color: white;
+  font-size: 16px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s;
+  padding: 10px 20px;
+  box-sizing: border-box;
+  width: 100%; 
+}
+
+.header-dropdown-btn:hover {
+  background-color: #ff8c00;
 }
 
 .header-dropdown-content {
   display: none;
   position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
+  background-color: #333;
+  color: white;
+  min-width: 150px;
+  border-radius: 5px;
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
   z-index: 1;
+  box-sizing: border-box;
+  overflow: hidden; 
 }
 
-.header-dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
+.header-dropdown-content button {
+  width: 100%;
+  padding: 10px;
+  color: white;
+  background-color: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  box-sizing: border-box;
 }
 
-.header-dropdown-content a:hover {
-  background-color: #f1f1f1;
+.header-dropdown-content button:hover {
+  background-color: #575757; 
+  color: #d3d3d3; 
 }
 
 .header-dropdown:hover .header-dropdown-content {
   display: block;
 }
 
-.header-dropdown:hover .header-dropdown-btn {
-  background-color: #ff8c00;
+.header-dropdown:hover .header-dropdown-content {
+  display: block;
 }
 
 .image-gallery {
@@ -277,4 +302,5 @@ export default {
   text-align: center;
   font-family: Arial, sans-serif;
 }
+
 </style>
