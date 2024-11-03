@@ -22,7 +22,7 @@
     </div>
     <div v-else-if="image">
       <h2 class="white-text">Inspirational Image</h2>
-      <p class="prompt-text"> {{ prompt }}</p> 
+      <p class="prompt-text"> {{ prompt }}</p>
       <div class="image-gallery">
         <div class="image-item">
           <img :src="image" alt="Inspiration" />
@@ -30,7 +30,10 @@
       </div>
       <div class="download-container">
         <button @click="downloadImage" class="download-button">
-          <i class="download-icon">&#x21E9;</i> Download Image
+          <i class="download-icon"></i> Download Image
+        </button>
+        <button @click="shareImage" class="share-button">
+          <i class="share-icon"></i> Share Image
         </button>
       </div>
     </div>
@@ -47,10 +50,10 @@ export default {
   name: 'AboutPage',
   data() {
     return {
-      image: null, 
-      prompt: '', 
-      isLoading: false, 
-      isAuthenticated: false, 
+      image: null,
+      prompt: '',
+      isLoading: false,
+      isAuthenticated: false,
       isLiked: false,
     };
   },
@@ -82,14 +85,14 @@ export default {
 
         const generateData = await generateResponse.json();
         this.image = generateData.image;
-        this.prompt = generateData.prompt; 
+        this.prompt = generateData.prompt;
       } catch (error) {
         console.error('Error fetching image:', error);
       } finally {
         this.isLoading = false;
       }
     },
-   
+
     async downloadImage() {
       try {
         const response = await axios.get(this.image, { responseType: 'blob' });
@@ -108,7 +111,18 @@ export default {
         console.error('Failed to download image:', error);
       }
     },
-    
+
+    shareImage() {
+      if (this.image) {
+        const subject = encodeURIComponent('Check out this inspirational image!');
+        const body = encodeURIComponent('Here is an inspirational image I wanted to share with you: ') + this.image;
+        const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
+        window.location.href = mailtoLink;
+      } else {
+        alert('No image to share!');
+      }
+    },
+
     handleLogout() {
       localStorage.removeItem('token');
       this.isAuthenticated = false;
@@ -119,7 +133,6 @@ export default {
     navigateTo(route) {
       this.$router.push(route);
     },
-
   },
 };
 </script>
@@ -173,7 +186,7 @@ export default {
   transition: background-color 0.3s;
   padding: 10px 20px;
   box-sizing: border-box;
-  width: 100%; 
+  width: 100%;
 }
 
 .header-dropdown-btn:hover {
@@ -190,7 +203,7 @@ export default {
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
   z-index: 1;
   box-sizing: border-box;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 .header-dropdown-content button {
@@ -207,12 +220,8 @@ export default {
 }
 
 .header-dropdown-content button:hover {
-  background-color: #575757; 
-  color: #d3d3d3; 
-}
-
-.header-dropdown:hover .header-dropdown-content {
-  display: block;
+  background-color: #575757;
+  color: #d3d3d3;
 }
 
 .header-dropdown:hover .header-dropdown-content {
@@ -273,6 +282,37 @@ export default {
   margin-right: 8px;
 }
 
+.share-button {
+  display: flex;
+  align-items: center;
+  background-color: #28bc28;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s ease, transform 0.2s;
+  margin-left: 10px; 
+}
+
+.share-button:hover {
+  background-color: #26a926;
+  transform: translateY(-2px);
+}
+
+.share-button:active {
+  background-color: #26a926;
+  transform: translateY(0);
+}
+
+.share-icon {
+  font-size: 18px;
+  margin-right: 8px;
+}
+
 .loading {
   display: flex;
   flex-direction: column;
@@ -281,13 +321,12 @@ export default {
 }
 
 .spinner {
-  border: 5px solid rgba(255, 255, 255, 0.3);
-  border-top: 5px solid #4a90e2;
+  border: 8px solid #f3f3f3; 
+  border-top: 8px solid #3498db; 
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  animation: spin 0.8s linear infinite;
-  margin-top: 10px;
+  animation: spin 2s linear infinite;
 }
 
 @keyframes spin {
@@ -296,11 +335,10 @@ export default {
 }
 
 .prompt-text {
-  color: #e0e0e0;
+  color: #f3f3f3; 
   font-size: 1rem;
   margin: 10px 0;
   text-align: center;
   font-family: Arial, sans-serif;
 }
-
 </style>
