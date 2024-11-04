@@ -271,10 +271,6 @@ export default {
   display: block;
 }
 
-.header-dropdown:hover .header-dropdown-content {
-  display: block;
-}
-
 .title {
   font-size: 60px;
   color: #FFA500;
