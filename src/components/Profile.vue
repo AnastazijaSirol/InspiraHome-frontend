@@ -14,8 +14,6 @@
       </div>
       <button class="logout-btn" @click="handleLogout">Log Out</button>
     </div>
-
-    <!-- Profil podaci -->
     <h1>Profile</h1>
     <div class="profile-field">
       <label>Username:</label>
@@ -51,7 +49,7 @@ export default {
       email: '',
       isEditing: false,
       isDesigner: false,
-      isAuthenticated: !!localStorage.getItem('token')  // Proverava da li je korisnik prijavljen
+      isAuthenticated: !!localStorage.getItem('token')  
     };
   },
   async created() {
