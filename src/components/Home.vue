@@ -267,11 +267,6 @@ export default {
   box-sizing: border-box;
 }
 
-.header-dropdown-content button:hover {
-  background-color: #575757; 
-  color: #d3d3d3; 
-}
-
 .header-dropdown:hover .header-dropdown-content {
   display: block;
 }
