@@ -1,6 +1,5 @@
 <template>
   <div class="profile-page">
-    <!-- Navigacijski meni -->
     <div class="header-menu" v-if="isAuthenticated">
       <div class="header-dropdown">
         <button class="header-dropdown-btn">Menu</button>
