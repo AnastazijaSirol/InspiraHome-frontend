@@ -1,23 +1,30 @@
 <template>
-    <div class="profile-page">
-      <h1>Profile</h1>
-      <div class="profile-field">
-        <label>Username:</label>
-        <input v-model="username" :disabled="!isEditing" />
-        <div class="buttons">
-          <button v-if="!isEditing" @click="enableEditing" class="edit">Edit</button>
-          <button v-else @click="saveChanges" class="save">Save</button>
-          <button v-if="isEditing" @click="cancelEditing" class="cancel">Cancel</button>
-        </div>
-      </div>
-      <div class="profile-field">
-        <label>Email:</label>
-        <span>{{ email }}</span>
+  <div class="profile-page">
+    <h1>Profile</h1>
+    <div class="profile-field">
+      <label>Username:</label>
+      <input v-model="username" :disabled="!isEditing" />
+      <div class="buttons">
+        <button v-if="!isEditing" @click="enableEditing" class="edit">Edit</button>
+        <button v-else @click="saveChanges" class="save">Save</button>
+        <button v-if="isEditing" @click="cancelEditing" class="cancel">Cancel</button>
       </div>
     </div>
-  </template>
+    <div class="profile-field">
+      <label>Email:</label>
+      <span>{{ email }}</span>
+    </div>
+    <div class="profile-field">
+      <label>Designer:</label>
+      <div class="designer-checkbox" :class="{ checked: isDesigner }" @click="toggleDesigner" v-if="!isDesigner">
+        <span v-if="isDesigner">✔</span>
+      </div>
+      <span v-else>✔ (You are a Designer)</span>
+    </div>
+  </div>
+</template>
   
-  <script>
+<script>
   import axios from 'axios';
   
   export default {
@@ -27,6 +34,7 @@
         username: '',
         email: '',
         isEditing: false,
+        isDesigner: false, 
       };
     },
     async created() {
@@ -41,6 +49,7 @@
           });
           this.username = response.data.username;
           this.email = response.data.email;
+          this.isDesigner = response.data.isDesigner; 
         } catch (error) {
           console.error('Error fetching profile data:', error);
           alert('Failed to load profile data.');
@@ -68,96 +77,130 @@
           alert('Failed to update username.');
         }
       },
+      async toggleDesigner() {
+        if (!confirm('By becoming a Designer, your profile will be public and this action cannot be undone. Proceed?')) {
+          return;
+        }
+
+        try {
+          const token = localStorage.getItem('token');
+          await axios.put(
+            'http://localhost:3000/api/profile/designer',
+            {},
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          this.isDesigner = true;
+          alert('You are now a Designer!');
+        } catch (error) {
+          console.error('Error setting designer status:', error);
+          alert('Failed to set designer status.');
+        }
+      },
     },
   };
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
   .profile-page {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 20px;
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  font-family: Arial, sans-serif;
-  text-align: center;
-  box-sizing: border-box;
-}
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    text-align: center;
+    box-sizing: border-box;
+  }
 
-h1 {
-  font-size: 1.6em;
-  color: #333;
-  margin-bottom: 20px;
-}
+  h1 {
+    font-size: 1.6em;
+    color: #333;
+    margin-bottom: 20px;
+  }
 
-.profile-field {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-bottom: 20px;
-  width: 100%;
-}
+  .profile-field {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    width: 100%;
+  }
 
-label {
-  font-weight: 500;
-  color: #555;
-  margin-bottom: 5px;
-  font-size: 0.9em;
-}
+  label {
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+  }
 
-input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  font-size: 1em;
-  box-sizing: border-box;
-}
+  input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
 
-span {
-  font-size: 1em;
-  color: #666;
-  padding: 10px 0;
-  display: block;
-  width: 100%;
-}
+  span {
+    font-size: 1em;
+    color: #666;
+    padding: 10px 0;
+    display: block;
+    width: 100%;
+  }
 
-.buttons {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  justify-content: center;
-  margin-top: 10px;
-}
+  .buttons {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+  }
 
-button {
-  padding: 8px 16px;
-  border-radius: 5px;
-  border: none;
-  font-size: 0.95em;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
+  button {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: none;
+    font-size: 0.95em;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
 
-button.edit {
-  background-color: #007bff;
-  color: #fff;
-}
+  button.edit {
+    background-color: #007bff;
+    color: #fff;
+  }
 
-button.save {
-  background-color: #28a745;
-  color: #fff;
-}
+  button.save {
+    background-color: #28a745;
+    color: #fff;
+  }
 
-button.cancel {
-  background-color: #6c757d;
-  color: #fff;
-}
+  button.cancel {
+    background-color: #6c757d;
+    color: #fff;
+  }
 
-button:hover {
-  opacity: 0.9;
-}
+  button:hover {
+    opacity: 0.9;
+  }
 
+  .designer-checkbox {
+    width: 20px;
+    height: 20px;
+    background-color: #ccc;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 16px;
+    color: white;
+  }
+
+  .designer-checkbox.checked {
+    background-color: #28a745;
+  }
 </style>
-  
