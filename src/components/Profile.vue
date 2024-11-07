@@ -1,5 +1,19 @@
 <template>
   <div class="profile-page">
+    <div class="header-menu">
+      <div v-if="isAuthenticated" class="header-dropdown">
+        <button class="header-dropdown-btn">Menu</button>
+        <div class="header-dropdown-content">
+          <button @click="navigateTo('/')">Home</button>
+          <button @click="navigateTo('/profile')">Profile</button>
+          <button @click="navigateTo('/group-chats')">Group Chats</button>
+          <button @click="navigateTo('/designers')">Designers</button>
+          <button @click="navigateTo('/competitions')">Competitions</button>
+          <button @click="navigateTo('/quiz')">Quiz</button>
+        </div>
+      </div>
+      <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">Log Out</button>
+    </div>
     <h1>Profile</h1>
     <div class="profile-field">
       <label>Username:</label>
@@ -333,6 +347,80 @@ button:hover {
   max-width: 90%;
   max-height: 90%;
   border-radius: 10px;
+}
+
+.header-menu {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 10px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.logout-btn {
+  padding: 10px 20px;
+  background-color: #FF4500;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+  margin-right: 20px;
+}
+
+.logout-btn:hover {
+  background-color: #ff2e00;
+}
+
+.header-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.header-dropdown-btn {
+  background-color: #FFA500;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  padding: 10px 20px;
+}
+
+.header-dropdown-btn:hover {
+  background-color: #ff8c00;
+}
+
+.header-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #333;
+  color: white;
+  min-width: 150px;
+  border-radius: 5px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.header-dropdown-content button {
+  width: 100%;
+  padding: 10px;
+  color: white;
+  background-color: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.header-dropdown:hover .header-dropdown-content {
+  display: block;
 }
 
 </style>
