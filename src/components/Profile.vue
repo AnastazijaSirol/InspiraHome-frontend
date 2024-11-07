@@ -1,5 +1,6 @@
 <template>
   <div class="profile-page">
+
     <div class="header-menu">
       <div v-if="isAuthenticated" class="header-dropdown">
         <button class="header-dropdown-btn">Menu</button>
@@ -14,6 +15,7 @@
       </div>
       <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">Log Out</button>
     </div>
+
     <h1>Profile</h1>
     <div class="profile-field">
       <label>Username:</label>
@@ -35,6 +37,7 @@
       </div>
       <span v-else>✔ (You are a Designer)</span>
     </div>
+
     <div class="liked-images">
       <h2>Liked Images</h2>
       <div v-if="likedImages.length === 0">No liked images found.</div>
@@ -48,29 +51,32 @@
         <img :src="currentImageUrl" class="modal-image" />
       </div>
     </div>
-    
-    <!-- History Section -->
-    <div class="history-section">
-      <h2>Search History</h2>
-      <div v-if="history.length === 0">No search history found.</div>
-      <table v-else class="history-table">
-        <thead>
-          <tr>
-            <th>Style</th>
-            <th>Room</th>
-            <th>Color</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in history" :key="item.dateTime">
-            <td>{{ item.style }}</td>
-            <td>{{ item.room }}</td>
-            <td>{{ item.color }}</td>
-            <td>{{ formatDate(item.dateTime) }}</td>
-          </tr>
-        </tbody>
-      </table>
+
+    <button @click="openHistoryModal" class="history-btn">View Search History</button>
+    <div v-if="isHistoryModalOpen" class="modal" @click="closeHistoryModal">
+      <div class="modal-content" @click.stop>
+        <h2>Search History</h2>
+        <button @click="closeHistoryModal" class="close-btn">Close</button>
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Style</th>
+              <th>Room</th>
+              <th>Color</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in history" :key="item.dateTime">
+              <td>{{ item.style }}</td>
+              <td>{{ item.room }}</td>
+              <td>{{ item.color }}</td>
+              <td>{{ formatDate(item.dateTime) }}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+      </div>
     </div>
   </div>
 </template>
@@ -90,7 +96,8 @@ export default {
       likedImages: [],
       isImageModalOpen: false,
       currentImageUrl: null,
-      history: []  
+      history: [],
+      isHistoryModalOpen: false,  
     };
   },
   async created() {
@@ -150,18 +157,11 @@ export default {
       const date = new Date(dateTime);
       return date.toLocaleString();
     },
-    async unlikeImage(likeId) { 
-      const token = localStorage.getItem('token');
-      try {
-        await axios.delete(`http://localhost:3000/api/likes/${likeId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        this.likedImages = this.likedImages.filter(image => image.id !== likeId);
-        alert('Image unliked successfully.');
-      } catch (error) {
-        console.error('Error unliking image:', error);
-        alert('Failed to unlike image.');
-      }
+    openHistoryModal() {
+      this.isHistoryModalOpen = true;
+    },
+    closeHistoryModal() {
+      this.isHistoryModalOpen = false;
     },
     enableEditing() {
       this.isEditing = true;
@@ -183,6 +183,19 @@ export default {
       } catch (error) {
         console.error('Error updating username:', error);
         alert('Failed to update username.');
+      }
+    },
+    async unlikeImage(likeId) { 
+      const token = localStorage.getItem('token');
+      try {
+        await axios.delete(`http://localhost:3000/api/likes/${likeId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.likedImages = this.likedImages.filter(image => image.id !== likeId);
+        alert('Image unliked successfully.');
+      } catch (error) {
+        console.error('Error unliking image:', error);
+        alert('Failed to unlike image.');
       }
     },
     async toggleDesigner() {
@@ -390,6 +403,15 @@ button:hover {
   z-index: 1000;
 }
 
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 80%;
+  max-height: 80%;
+  overflow-y: auto;
+}
+
 .modal-image {
   max-width: 90%;
   max-height: 90%;
@@ -470,14 +492,49 @@ button:hover {
   display: block;
 }
 
-th, td {
+.history-btn {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 1em;
+}
+
+.history-btn:hover {
+  background-color: #0056b3;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.history-table th, .history-table td {
   padding: 10px;
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
 
-th {
+.history-table th {
   background-color: #f4f4f4;
+}
+
+.close-btn {
+  margin-top: 15px;
+  background-color: #dc3545;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background-color: #c82333;
 }
 
 </style>
