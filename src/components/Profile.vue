@@ -48,6 +48,30 @@
         <img :src="currentImageUrl" class="modal-image" />
       </div>
     </div>
+    
+    <!-- History Section -->
+    <div class="history-section">
+      <h2>Search History</h2>
+      <div v-if="history.length === 0">No search history found.</div>
+      <table v-else class="history-table">
+        <thead>
+          <tr>
+            <th>Style</th>
+            <th>Room</th>
+            <th>Color</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in history" :key="item.dateTime">
+            <td>{{ item.style }}</td>
+            <td>{{ item.room }}</td>
+            <td>{{ item.color }}</td>
+            <td>{{ formatDate(item.dateTime) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -66,11 +90,13 @@ export default {
       likedImages: [],
       isImageModalOpen: false,
       currentImageUrl: null,
+      history: []  
     };
   },
   async created() {
     await this.fetchProfileData();
     await this.fetchLikedImages();
+    await this.fetchSearchHistory(); 
   },
   methods: {
     async fetchProfileData() {
@@ -102,6 +128,27 @@ export default {
         console.error('Error fetching liked images:', error);
         alert('Failed to load liked images.');
       }
+    },
+    async fetchSearchHistory() {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await axios.get('http://localhost:3000/api/history', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.history = response.data.map(item => ({
+          style: item.style,
+          room: item.room,
+          color: item.color,
+          dateTime: item.dateTime,
+        }));
+      } catch (error) {
+        console.error('Error fetching search history:', error);
+        alert('Failed to load search history.');
+      }
+    },
+    formatDate(dateTime) {
+      const date = new Date(dateTime);
+      return date.toLocaleString();
     },
     async unlikeImage(likeId) { 
       const token = localStorage.getItem('token');
@@ -421,6 +468,16 @@ button:hover {
 
 .header-dropdown:hover .header-dropdown-content {
   display: block;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f4f4f4;
 }
 
 </style>
