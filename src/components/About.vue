@@ -22,7 +22,7 @@
     </div>
     <div v-else-if="image">
       <h2 class="white-text">Inspirational Image</h2>
-      <p class="prompt-text"> {{ prompt }}</p>
+      <p class="prompt-text">{{ prompt }}</p>
       <div class="image-gallery">
         <div class="image-item">
           <img :src="image" alt="Inspiration" />
@@ -34,6 +34,12 @@
         </button>
         <button @click="shareImage" class="share-button">
           <i class="share-icon"></i> Share Image
+        </button>
+        <button v-if="isLiked" class="like-button liked" disabled>
+          <i class="like-icon"></i> Liked
+        </button>
+        <button v-else class="like-button" @click="toggleLike">
+          <i class="like-icon"></i> Like
         </button>
       </div>
     </div>
@@ -67,6 +73,7 @@ export default {
   methods: {
     async fetchImage() {
       this.isLoading = true;
+      this.isLiked = false;
       try {
         const token = localStorage.getItem('token');
         const generateResponse = await fetch(`http://localhost:3000/api/images`, {
@@ -86,10 +93,30 @@ export default {
         const generateData = await generateResponse.json();
         this.image = generateData.image;
         this.prompt = generateData.prompt;
+
+        await this.checkIfLiked(this.image);
       } catch (error) {
         console.error('Error fetching image:', error);
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    async checkIfLiked(imageUrl) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`http://localhost:3000/api/likes/check`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            imageUrl,
+          },
+        });
+
+        this.isLiked = response.data.liked;
+      } catch (error) {
+        console.error('Error checking if liked:', error);
       }
     },
 
@@ -133,9 +160,32 @@ export default {
     navigateTo(route) {
       this.$router.push(route);
     },
+
+    async toggleLike() {
+      const token = localStorage.getItem('token');
+      const likePayload = {
+        imageUrl: this.image,
+      };
+
+      try {
+        const response = await axios.post('http://localhost:3000/api/likes', likePayload, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.data.success) {
+          this.isLiked = true; 
+        }
+      } catch (error) {
+        console.error('Error saving like:', error);
+      }
+    },
   },
 };
 </script>
+
 
 <style>
 .white-text {
@@ -335,5 +385,39 @@ export default {
   margin: 10px 0;
   text-align: center;
   font-family: Arial, sans-serif;
+}
+.like-button {
+  display: flex;
+  align-items: center;
+  background-color: #ff6b6b;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s ease, transform 0.2s;
+  margin-left: 10px;
+}
+
+.like-button:hover {
+  background-color: #ff4d4d;
+  transform: translateY(-2px);
+}
+
+.like-button:active {
+  background-color: #e60000;
+  transform: translateY(0);
+}
+
+.like-icon {
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+.liked {
+  background-color: #d9534f;
 }
 </style>
