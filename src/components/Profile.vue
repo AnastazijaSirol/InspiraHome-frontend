@@ -1,6 +1,5 @@
 <template>
   <div class="profile-page">
-
     <div class="header-menu">
       <div v-if="isAuthenticated" class="header-dropdown">
         <button class="header-dropdown-btn">Menu</button>
@@ -38,6 +37,42 @@
       <span v-else>✔ (You are a Designer)</span>
     </div>
 
+    <button @click="openHistoryModal" class="history-btn">View Search History</button>
+    <div v-if="isHistoryModalOpen" class="modal" @click="closeHistoryModal">
+      <div class="modal-content" @click.stop>
+        <h2>Search History</h2>
+        <div class="sort-container">
+          <label for="sortOrder">Sort by Date: </label>
+          <select v-model="sortOrder" @change="sortHistory" id="sortOrder">
+            <option value="asc">Ascending (ASC)</option>
+            <option value="desc">Descending (DESC)</option>
+          </select>
+        </div>
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Style</th>
+              <th>Room</th>
+              <th>Color</th>
+              <th>Date</th>
+              <th>Actions</th> 
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in history" :key="item.dateTime">
+              <td>{{ item.style }}</td>
+              <td>{{ item.room }}</td>
+              <td>{{ item.color }}</td>
+              <td>{{ formatDate(item.dateTime) }}</td>
+              <td>
+                <button @click="deleteHistory(item.dateTime)" class="delete-btn">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="liked-images">
       <h2>Liked Images</h2>
       <div v-if="likedImages.length === 0">No liked images found.</div>
@@ -49,33 +84,6 @@
       </div>
       <div v-if="isImageModalOpen" class="modal" @click="closeModal">
         <img :src="currentImageUrl" class="modal-image" />
-      </div>
-    </div>
-
-    <button @click="openHistoryModal" class="history-btn">View Search History</button>
-    <div v-if="isHistoryModalOpen" class="modal" @click="closeHistoryModal">
-      <div class="modal-content" @click.stop>
-        <h2>Search History</h2>
-        <button @click="closeHistoryModal" class="close-btn">Close</button>
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Style</th>
-              <th>Room</th>
-              <th>Color</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in history" :key="item.dateTime">
-              <td>{{ item.style }}</td>
-              <td>{{ item.room }}</td>
-              <td>{{ item.color }}</td>
-              <td>{{ formatDate(item.dateTime) }}</td>
-            </tr>
-          </tbody>
-        </table>
-        
       </div>
     </div>
   </div>
@@ -97,13 +105,14 @@ export default {
       isImageModalOpen: false,
       currentImageUrl: null,
       history: [],
-      isHistoryModalOpen: false,  
+      isHistoryModalOpen: false,
+      sortOrder: 'desc',  
     };
   },
   async created() {
     await this.fetchProfileData();
     await this.fetchLikedImages();
-    await this.fetchSearchHistory(); 
+    await this.fetchSearchHistory();
   },
   methods: {
     async fetchProfileData() {
@@ -148,6 +157,7 @@ export default {
           color: item.color,
           dateTime: item.dateTime,
         }));
+        this.sortHistory();  
       } catch (error) {
         console.error('Error fetching search history:', error);
         alert('Failed to load search history.');
@@ -158,10 +168,17 @@ export default {
       return date.toLocaleString();
     },
     openHistoryModal() {
-      this.isHistoryModalOpen = true;
+      this.isHistoryModalOpen = true;   
     },
     closeHistoryModal() {
       this.isHistoryModalOpen = false;
+    },
+    sortHistory() {
+      if (this.sortOrder === 'asc') {
+        this.history.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+      } else {
+        this.history.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+      }
     },
     enableEditing() {
       this.isEditing = true;
@@ -231,6 +248,19 @@ export default {
     },
     navigateTo(route) {
       this.$router.push(route);
+    },
+    async deleteHistory(dateTime) {
+      const token = localStorage.getItem('token');
+      try {
+        await axios.delete(`http://localhost:3000/api/history/${dateTime}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.history = this.history.filter(item => item.dateTime !== dateTime);
+        alert('History entry deleted successfully.');
+      } catch (error) {
+        console.error('Error deleting history entry:', error);
+        alert('Failed to delete history entry.');
+      }
     },
   },
 };
@@ -523,17 +553,30 @@ button:hover {
   background-color: #f4f4f4;
 }
 
-.close-btn {
-  margin-top: 15px;
+.sort-container {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-container select {
+  padding: 5px;
+  font-size: 1em;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.delete-btn {
   background-color: #dc3545;
   color: #fff;
-  padding: 10px 20px;
+  padding: 5px 10px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 
-.close-btn:hover {
+.delete-btn:hover {
   background-color: #c82333;
 }
 
