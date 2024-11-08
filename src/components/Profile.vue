@@ -245,6 +245,7 @@ export default {
       localStorage.removeItem('token');
       this.isAuthenticated = false;
       alert('Logged out successfully!');
+      this.$router.push('/');
     },
     navigateTo(route) {
       this.$router.push(route);
