@@ -187,21 +187,24 @@ export default {
       this.isEditing = false;
       this.fetchProfileData();
     },
+    
     async saveChanges() {
       const token = localStorage.getItem('token');
       try {
         await axios.put(
-          'http://localhost:3000/api/profile',
-          { username: this.username },
+          'http://localhost:3000/api/profile', 
+          { username: this.username }, 
           { headers: { Authorization: `Bearer ${token}` } }
         );
         alert('Username updated successfully!');
         this.isEditing = false;
+        this.fetchProfileData();  
       } catch (error) {
         console.error('Error updating username:', error);
         alert('Failed to update username.');
       }
     },
+
     async unlikeImage(likeId) { 
       const token = localStorage.getItem('token');
       try {
