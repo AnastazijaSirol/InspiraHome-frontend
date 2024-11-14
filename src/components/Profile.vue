@@ -73,6 +73,19 @@
       </div>
     </div>
 
+    <div>
+      <button v-if="isDesigner" @click="openAddImageModal" class="add-image-btn">Add Image</button>
+    </div>
+
+    <div v-if="isAddImageModalOpen" class="modal" @click="closeAddImageModal">
+      <div class="modal-content" @click.stop>
+        <h2>Add New Image</h2>
+        <label for="imageFile">Upload Image:</label>
+        <input type="file" @change="onImageSelected" id="imageFile" accept="image/*" />
+        <button @click="addImage" class="submit-btn" :disabled="!selectedImageFile">Submit</button>
+      </div>
+    </div>
+
     <div class="liked-images">
       <h2>Liked Images</h2>
       <div v-if="likedImages.length === 0">No liked images found.</div>
@@ -106,7 +119,10 @@ export default {
       currentImageUrl: null,
       history: [],
       isHistoryModalOpen: false,
-      sortOrder: 'desc',  
+      sortOrder: 'desc',
+      isAddImageModalOpen: false,  
+      selectedImageFile: null,
+      imagePreviewUrl: '',
     };
   },
   async created() {
@@ -129,6 +145,60 @@ export default {
         alert('Failed to load profile data.');
       }
     },
+    openAddImageModal() {
+      this.isAddImageModalOpen = true;
+    },
+    closeAddImageModal() {
+      this.isAddImageModalOpen = false;
+      this.selectedImageFile = null;
+      this.imagePreviewUrl = '';
+    },
+    onImageSelected(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.selectedImageFile = file;
+        this.imagePreviewUrl = URL.createObjectURL(file); 
+      }
+    },
+    async addImage() {
+      if (!this.selectedImageFile) {
+        alert('Please select an image.');
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('No token found. Please log in first.');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', this.selectedImageFile); 
+
+        const response = await axios.post(
+          'http://localhost:3000/api/upload-image',
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data', 
+            },
+          }
+        );
+
+        console.log('Image uploaded successfully:', response.data);
+        alert('Image uploaded successfully');
+
+        this.imageUrl = response.data.url; 
+        this.closeAddImageModal();
+
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        alert('Failed to upload image.');
+      }
+    },
+
     async fetchLikedImages() {
       const token = localStorage.getItem('token');
       try {
@@ -187,53 +257,32 @@ export default {
       this.isEditing = false;
       this.fetchProfileData();
     },
-    
     async saveChanges() {
       const token = localStorage.getItem('token');
       try {
         await axios.put(
-          'http://localhost:3000/api/profile', 
-          { username: this.username }, 
+          'http://localhost:3000/api/update-profile',
+          { username: this.username },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        alert('Username updated successfully!');
+        alert('Profile updated successfully.');
         this.isEditing = false;
-        this.fetchProfileData();  
       } catch (error) {
-        console.error('Error updating username:', error);
-        alert('Failed to update username.');
+        console.error('Error updating profile:', error);
+        alert('Failed to update profile.');
       }
     },
-
-    async unlikeImage(likeId) { 
+    async unlikeImage(id) {
       const token = localStorage.getItem('token');
       try {
-        await axios.delete(`http://localhost:3000/api/likes/${likeId}`, {
+        await axios.delete(`http://localhost:3000/api/likes/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        this.likedImages = this.likedImages.filter(image => image.id !== likeId);
-        alert('Image unliked successfully.');
+        alert('Image unliked.');
+        this.likedImages = this.likedImages.filter(image => image.id !== id);
       } catch (error) {
         console.error('Error unliking image:', error);
         alert('Failed to unlike image.');
-      }
-    },
-    async toggleDesigner() {
-      if (!confirm('By becoming a Designer, your profile will be public and this action cannot be undone. Proceed?')) {
-        return;
-      }
-      try {
-        const token = localStorage.getItem('token');
-        await axios.put(
-          'http://localhost:3000/api/profile/designer',
-          {},
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        this.isDesigner = true;
-        alert('You are now a Designer!');
-      } catch (error) {
-        console.error('Error setting designer status:', error);
-        alert('Failed to set designer status.');
       }
     },
     openImage(imageUrl) {
@@ -244,27 +293,16 @@ export default {
       this.isImageModalOpen = false;
       this.currentImageUrl = null;
     },
+    toggleDesigner() {
+      this.isDesigner = !this.isDesigner;
+    },
     handleLogout() {
       localStorage.removeItem('token');
       this.isAuthenticated = false;
-      alert('Logged out successfully!');
-      this.$router.push('/');
+      this.navigateTo('/login');
     },
-    navigateTo(route) {
-      this.$router.push(route);
-    },
-    async deleteHistory(dateTime) {
-      const token = localStorage.getItem('token');
-      try {
-        await axios.delete(`http://localhost:3000/api/history/${dateTime}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        this.history = this.history.filter(item => item.dateTime !== dateTime);
-        alert('History entry deleted successfully.');
-      } catch (error) {
-        console.error('Error deleting history entry:', error);
-        alert('Failed to delete history entry.');
-      }
+    navigateTo(path) {
+      this.$router.push(path);
     },
   },
 };
