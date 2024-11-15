@@ -73,6 +73,24 @@
       </div>
     </div>
 
+    <div v-if="isDesigner">
+      <button @click="openUploadModal" class="upload-btn">Upload Image</button>
+    </div>
+
+    <div v-if="isUploadModalOpen" class="modal" @click="closeUploadModal">
+      <div class="modal-content" @click.stop>
+        <h2>Upload Image</h2>
+        <form @submit.prevent="uploadImage">
+          <div class="form-group">
+            <label for="imageFile">Select Image:</label>
+            <input type="file" id="imageFile" @change="handleFileChange" accept=".png, .jpg, .jpeg, .gif" />
+          </div>
+          <button type="submit" class="submit-btn">Upload</button>
+          <button type="button" class="cancel-btn" @click="closeUploadModal">Cancel</button>
+        </form>
+      </div>
+    </div>
+
     <div class="liked-images">
       <h2>Liked Images</h2>
       <div v-if="likedImages.length === 0">No liked images found.</div>
@@ -107,6 +125,8 @@ export default {
       history: [],
       isHistoryModalOpen: false,
       sortOrder: 'desc',  
+      isUploadModalOpen: false,
+      selectedFile: null,
     };
   },
   async created() {
@@ -129,6 +149,65 @@ export default {
         alert('Failed to load profile data.');
       }
     },
+
+    openUploadModal() {
+      this.isUploadModalOpen = true;
+    },
+
+    closeUploadModal() {
+      this.isUploadModalOpen = false;
+      this.selectedFile = null; 
+    },
+
+    handleFileChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.selectedFile = {
+            base64: e.target.result.split(',')[1], 
+            name: file.name,
+          };
+        };
+        reader.readAsDataURL(file); 
+      }
+    },
+
+    async uploadImage() {
+      if (!this.selectedFile) {
+        alert('Please select a file before uploading.');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      try {
+        const response = await axios.post(
+          'http://localhost:3000/api/upload',
+          {
+            file: this.selectedFile.base64,
+            filename: this.selectedFile.name,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        alert('Image uploaded successfully!');
+        this.closeUploadModal(); 
+        console.log('Uploaded image URL:', response.data.imageUrl);
+
+        this.likedImages.push({
+          id: response.data.added.id,
+          imageUrl: response.data.imageUrl,
+        });
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        alert('Failed to upload image. Please try again.');
+      }
+    },
+
     async fetchLikedImages() {
       const token = localStorage.getItem('token');
       try {
