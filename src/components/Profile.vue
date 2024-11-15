@@ -77,6 +77,10 @@
       <button @click="openUploadModal" class="upload-btn">Upload Image</button>
     </div>
 
+    <div v-if="isDesigner">
+      <button @click="openUploadedImagesModal" class="upload-btn">View Uploaded Images</button>
+    </div>
+
     <div v-if="isUploadModalOpen" class="modal" @click="closeUploadModal">
       <div class="modal-content" @click.stop>
         <h2>Upload Image</h2>
@@ -88,6 +92,20 @@
           <button type="submit" class="submit-btn">Upload</button>
           <button type="button" class="cancel-btn" @click="closeUploadModal">Cancel</button>
         </form>
+      </div>
+    </div>
+
+    <div v-if="isUploadedImagesModalOpen" class="modal" @click="closeUploadedImagesModal">
+      <div class="modal-content" @click.stop>
+        <h2>Uploaded Images</h2>
+        <div v-if="uploadedImages.length === 0">No uploaded images found.</div>
+        <div v-else class="images-container">
+          <div v-for="image in uploadedImages" :key="image.id" class="image-item">
+            <img :src="image.url" alt="Uploaded image" />
+            <p>Uploaded on: {{ formatDate(image.createdAt) }}</p>
+          </div>
+        </div>
+        <button class="close-btn" @click="closeUploadedImagesModal">Close</button>
       </div>
     </div>
 
@@ -127,6 +145,8 @@ export default {
       sortOrder: 'desc',  
       isUploadModalOpen: false,
       selectedFile: null,
+      isUploadedImagesModalOpen: false,
+      uploadedImages: [],
     };
   },
   async created() {
@@ -206,6 +226,27 @@ export default {
         console.error('Error uploading image:', error);
         alert('Failed to upload image. Please try again.');
       }
+    },
+
+    async fetchUploadedImages() {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await axios.get('http://localhost:3000/api/uploaded-images', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.uploadedImages = response.data;
+      } catch (error) {
+        console.error('Error fetching uploaded images:', error);
+        alert('Failed to load uploaded images.');
+      }
+    },
+    openUploadedImagesModal() {
+      this.isUploadedImagesModalOpen = true;
+      this.fetchUploadedImages(); 
+    },
+    closeUploadedImagesModal() {
+      this.isUploadedImagesModalOpen = false;
+      this.uploadedImages = [];
     },
 
     async fetchLikedImages() {
