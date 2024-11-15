@@ -102,7 +102,6 @@
         <div v-else class="images-container">
           <div v-for="image in uploadedImages" :key="image.id" class="image-item">
             <img :src="image.url" alt="Uploaded image" />
-            <p>Uploaded on: {{ formatDate(image.createdAt) }}</p>
           </div>
         </div>
         <button class="close-btn" @click="closeUploadedImagesModal">Close</button>
