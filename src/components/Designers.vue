@@ -28,7 +28,7 @@
     </div>
   </template>  
   
-  <script>
+<script scoped>
 import axios from "axios";
 
 export default {
@@ -201,5 +201,5 @@ export default {
     background-color: #f9f9f9;
     cursor: pointer;
     }
-  </style>
+</style>
   
