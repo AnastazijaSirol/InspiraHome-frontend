@@ -55,7 +55,7 @@
               <th>Room</th>
               <th>Color</th>
               <th>Date</th>
-              <th>Actions</th> 
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -101,7 +101,7 @@
         <div v-if="uploadedImages.length === 0">No uploaded images found.</div>
         <div v-else class="images-container">
           <div v-for="image in uploadedImages" :key="image.id" class="image-item">
-            <img :src="image.url" alt="Uploaded image" />
+            <img :src="image.url" @click="openImage(image.url)" alt="Uploaded image" />
           </div>
         </div>
         <button class="close-btn" @click="closeUploadedImagesModal">Close</button>
@@ -117,8 +117,11 @@
           <button @click="unlikeImage(image.id)" class="unlike-btn">Unlike</button>
         </div>
       </div>
-      <div v-if="isImageModalOpen" class="modal" @click="closeModal">
-        <img :src="currentImageUrl" class="modal-image" />
+    </div>
+
+    <div v-if="isImageModalOpen" class="modal" @click="closeModal">
+      <div class="modal-content">
+        <img :src="currentImageUrl" @click="closeModal" class="modal-image" />
       </div>
     </div>
   </div>
