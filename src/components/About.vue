@@ -143,8 +143,10 @@ export default {
       if (this.image) {
         const subject = encodeURIComponent('Check out this inspirational image!');
         const body = encodeURIComponent('Here is an inspirational image I wanted to share with you: ') + this.image;
-        const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
-        window.location.href = mailtoLink;
+
+        const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=&su=${subject}&body=${body}`;
+
+        window.open(gmailLink, '_blank');
       } else {
         alert('No image to share!');
       }
