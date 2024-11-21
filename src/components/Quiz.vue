@@ -17,24 +17,28 @@
     </div>
     <div class="quiz-container">
       <h1>Style Quiz</h1>
-      <div v-if="currentQuestionIndex < questions.length">
+      <div v-if="existingStyle">
+        <h2>Your Style is: {{ existingStyle }}</h2>
+        <p>{{ styleDescriptions[existingStyle] }}</p>
+      </div>
+      <div v-else-if="currentQuestionIndex < questions.length">
         <h2>{{ questions[currentQuestionIndex].question }}</h2>
-          <ul v-for="(answer, index) in questions[currentQuestionIndex].answers" 
-              :key="index" 
-              @click="selectAnswer(index)"
-              class="answer-option">
-            {{ answer }}
-          </ul>
+        <ul v-for="(answer, index) in questions[currentQuestionIndex].answers" 
+            :key="index" 
+            @click="selectAnswer(index)"
+            class="answer-option">
+          {{ answer }}
+        </ul>
       </div>
       <div class="result" v-else>
         <h2>Your Style is: {{ resultStyle }}</h2>
         <p>{{ styleDescriptions[resultStyle] }}</p>
-        <button @click="restartQuiz">Retake Quiz</button>
       </div>
     </div>
-  </template>
+  </template>  
   
   <script>
+  import axios from 'axios';
   export default {
     name: "QuizPage",
     data() {
@@ -42,6 +46,7 @@
         isAuthenticated: !!localStorage.getItem("token"),
         currentQuestionIndex: 0,
         answers: [],
+        existingStyle: null,
         questions: [
           {
             question: "What's your ideal living room decor?",
@@ -111,36 +116,78 @@
       };
     },
     computed: {
-      resultStyle() {
-        const styleCounts = this.answers.reduce((acc, answer) => {
-          acc[answer] = (acc[answer] || 0) + 1;
-          return acc;
-        }, {});
-        const mostFrequent = Object.keys(styleCounts).reduce((a, b) =>
-          styleCounts[a] > styleCounts[b] ? a : b
+    resultStyle() {
+      if (this.existingStyle) {
+        return this.existingStyle; 
+      }
+      const styleCounts = this.answers.reduce((acc, answer) => {
+        acc[answer] = (acc[answer] || 0) + 1;
+        return acc;
+      }, {});
+      const mostFrequent = Object.keys(styleCounts).reduce((a, b) =>
+        styleCounts[a] > styleCounts[b] ? a : b
+      );
+      return this.styles[mostFrequent];
+    }
+  },
+  methods: {
+    async fetchQuizResult() {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          "http://localhost:3000/api/get-quiz-result",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
         );
-        return this.styles[mostFrequent];
+        if (response.data.length > 0) {
+          this.existingStyle = response.data[0].style; 
+        }
+      } catch (error) {
+        console.error("Error fetching quiz result:", error);
       }
     },
-    methods: {
-      selectAnswer(answerIndex) {
-        this.answers.push(answerIndex);
-        this.currentQuestionIndex++;
-      },
-      restartQuiz() {
-        this.currentQuestionIndex = 0;
-        this.answers = [];
-      },
-      navigateTo(route) {
-        this.$router.push(route);
-      },
-      handleLogout() {
-        localStorage.removeItem("token");
-        this.isAuthenticated = false;
-        alert("Logged out successfully!");
-        this.$router.push("/");
-      },
+    selectAnswer(answerIndex) {
+      if (this.existingStyle) return; // Prevent further interaction
+      this.answers.push(answerIndex);
+      this.currentQuestionIndex++;
+    },
+    navigateTo(route) {
+      this.$router.push(route);
+    },
+    handleLogout() {
+      localStorage.removeItem("token");
+      this.isAuthenticated = false;
+      alert("Logged out successfully!");
+      this.$router.push("/");
+    },
+    async saveResult(style) {
+      if (this.existingStyle) return; // Prevent saving if result exists
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post(
+          "http://localhost:3000/api/save-quiz-result",
+          { style },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        alert("Quiz result saved successfully!");
+      } catch (error) {
+        console.error("Error saving quiz result:", error);
+        alert("Failed to save quiz result.");
+      }
     }
+  },
+  async created() {
+    if (this.isAuthenticated) {
+      await this.fetchQuizResult(); 
+    }
+  }
   };
   </script>
   
@@ -225,6 +272,8 @@
     text-align: center;
     margin: 20px auto;
     max-width: 600px;
+    color: white;
+    font-size: 1.5erm;
   }
 
   h1 {
@@ -233,7 +282,7 @@
   }
 
   h2 {
-    font-size: 1.5rem;
+    font-size: 2rem;
     margin-bottom: 20px;
     color: #ffffff;
   }
@@ -251,15 +300,6 @@
 
   .answer-option:hover {
     background-color: #323030;
-  }
-
-  button {
-    padding: 10px 20px;
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
   }
 
   .result {
