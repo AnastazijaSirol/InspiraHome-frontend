@@ -37,14 +37,16 @@
       <div class="modal-content">
         <span class="close" @click="closeModal">&times;</span>
         <h2>{{ selectedDesigner?.username }}'s Images</h2>
-        <div v-if="designerImages.length">
-          <img
-            v-for="image in designerImages"
-            :key="image.id"
-            :src="image.url"
-            alt="Designer upload"
-            class="designer-image"
-          />
+        <div v-if="designerImages.length" class="image-carousel">
+          <button class="nav-btn left" @click="prevImage">&#8249;</button>
+          <div class="image-container">
+            <img
+              :src="designerImages[currentImageIndex]?.url"
+              alt="Designer upload"
+              class="carousel-image"
+            />
+          </div>
+          <button class="nav-btn right" @click="nextImage">&#8250;</button>
         </div>
         <p v-else>This designer hasn't uploaded any images.</p>
       </div>
@@ -64,6 +66,7 @@ export default {
       showModal: false,
       selectedDesigner: null,
       designerImages: [],
+      currentImageIndex: 0,
     };
   },
   async created() {
@@ -118,24 +121,33 @@ export default {
         );
 
         if (response.data.length === 0) {
-          console.warn("No images found for this designer.");
           alert("This designer has no uploaded images.");
           this.designerImages = [];
           return;
         }
 
         this.designerImages = response.data;
+        this.currentImageIndex = 0;
         this.showModal = true;
       } catch (error) {
         console.error("Error fetching designer images:", error);
         alert("Failed to load designer images.");
       }
     },
-
     closeModal() {
       this.showModal = false;
       this.selectedDesigner = null;
       this.designerImages = [];
+      this.currentImageIndex = 0;
+    },
+    nextImage() {
+      this.currentImageIndex =
+        (this.currentImageIndex + 1) % this.designerImages.length;
+    },
+    prevImage() {
+      this.currentImageIndex =
+        (this.currentImageIndex - 1 + this.designerImages.length) %
+        this.designerImages.length;
     },
   },
 };
@@ -218,7 +230,7 @@ export default {
 }
 
 .designers-page {
-  max-width: 400px;
+  max-width: 500px;
   margin: 50px auto;
   padding: 20px;
   background-color: #ffffff;
@@ -229,7 +241,7 @@ export default {
 }
 
 h1 {
-  font-size: 1.6em;
+  font-size: 1.8em;
   color: #333;
   margin-bottom: 20px;
 }
@@ -247,6 +259,7 @@ ul {
 .designer-item {
   padding: 10px;
   border-bottom: 1px solid #ddd;
+  cursor: pointer;
 }
 
 .designer-item h3 {
@@ -256,7 +269,6 @@ ul {
 
 .designer-item:hover {
   background-color: #f9f9f9;
-  cursor: pointer;
 }
 
 .modal {
@@ -269,14 +281,16 @@ ul {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .modal-content {
   background: white;
   padding: 20px;
   border-radius: 8px;
-  max-width: 500px;
+  max-width: 600px;
   text-align: center;
+  position: relative;
 }
 
 .modal-content .close {
@@ -287,9 +301,37 @@ ul {
   cursor: pointer;
 }
 
-.designer-image {
-  max-width: 100%;
-  margin: 10px 0;
+.image-carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-container {
+  max-width: 400px;
+  max-height: 300px;
+  overflow: hidden;
   border-radius: 8px;
+}
+
+.carousel-image {
+  width: 100%;
+  object-fit: contain;
+}
+
+.nav-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  margin: 0 10px;
+  padding: 10px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.nav-btn:hover {
+  background-color: #0056b3;
 }
 </style>
