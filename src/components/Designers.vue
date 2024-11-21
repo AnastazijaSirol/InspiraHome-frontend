@@ -49,10 +49,10 @@
           <button class="nav-btn right" @click="nextImage">&#8250;</button>
         </div>
         <p v-else>This designer hasn't uploaded any images.</p>
-        
+
         <a 
-          href="https://mail.google.com/mail/?view=cm&fs=1&to=" 
-          target="_blank" 
+          :href="generateEmailLink"
+          target="_blank"
           class="email-btn"
         >
           Contact Designer
@@ -75,6 +75,7 @@ export default {
       selectedDesigner: null,
       designerImages: [],
       currentImageIndex: 0,
+      emailLink: '', 
     };
   },
   async created() {
@@ -118,6 +119,14 @@ export default {
         return;
       }
 
+      if (designer.email) {
+        const subject = encodeURIComponent('Greetings!');
+        this.emailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${designer.email}&su=${subject}`;
+      } else {
+        console.error("Designer email not available.");
+        this.emailLink = ''; 
+      }
+
       try {
         const response = await axios.get(
           `http://localhost:3000/api/images/${designer.id}`,
@@ -156,6 +165,11 @@ export default {
       this.currentImageIndex =
         (this.currentImageIndex - 1 + this.designerImages.length) % 
         this.designerImages.length;
+    },
+  },
+  computed: {
+    generateEmailLink() {
+      return this.emailLink;
     },
   },
 };
