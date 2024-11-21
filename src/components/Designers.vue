@@ -49,6 +49,14 @@
           <button class="nav-btn right" @click="nextImage">&#8250;</button>
         </div>
         <p v-else>This designer hasn't uploaded any images.</p>
+        
+        <a 
+          href="https://mail.google.com/mail/?view=cm&fs=1&to=" 
+          target="_blank" 
+          class="email-btn"
+        >
+          Contact Designer
+        </a>
       </div>
     </div>
   </div>
@@ -146,7 +154,7 @@ export default {
     },
     prevImage() {
       this.currentImageIndex =
-        (this.currentImageIndex - 1 + this.designerImages.length) %
+        (this.currentImageIndex - 1 + this.designerImages.length) % 
         this.designerImages.length;
     },
   },
@@ -334,4 +342,22 @@ ul {
 .nav-btn:hover {
   background-color: #0056b3;
 }
+
+.email-btn {
+  display: inline-block;
+  padding: 12px 25px;
+  background-color: #ff4500;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-top: 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.email-btn:hover {
+  background-color: #ff2e00;
+}
+
 </style>
