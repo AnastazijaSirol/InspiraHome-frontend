@@ -87,7 +87,7 @@ export default {
       password: '',
       styleOptions: ['Any', 'Modern', 'Minimalistic', 'Vintage', 'Boho', 'Scandinavian', 'Traditional'],
       roomOptions: ['Any room', 'Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Office', 'Hallway'],
-      colorOptions: ['Any','Red', 'Blue', 'Green', 'Yellow', 'Beige', 'White', 'Black', 'Orange', 'Brown'],
+      colorOptions: ['Any', 'Red', 'Blue', 'Green', 'Yellow', 'Beige', 'White', 'Black', 'Orange', 'Brown'],
       selectedStyle: '',
       selectedRoom: '',
       selectedColor: ''
@@ -129,53 +129,49 @@ export default {
         alert('Login failed: ' + error.response.data);
       }
     },
-
     handleLogout() {
       localStorage.removeItem('token');
       this.isAuthenticated = false;
       alert('Logged out successfully!');
     },
-
     navigateTo(route) {
       this.$router.push(route);
     },
-
     async confirmSelection() {
-    if (this.selectedStyle && this.selectedRoom && this.selectedColor) {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('Please log in to save your selection.');
-        return;
-      }
-
-      try {
-        const response = await fetch('http://localhost:3000/api/history', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,  
-        },
-        body: JSON.stringify({
-          style: this.selectedStyle,
-          room: this.selectedRoom,
-          color: this.selectedColor,
-        }),
-      });
-
-
-        if (response.ok) {
-          alert('Selection saved!');
-          this.$router.push('/about');
-        } else {
-          alert('Failed to save selection.');
+      if (this.selectedStyle && this.selectedRoom && this.selectedColor) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('Please log in to save your selection.');
+          return;
         }
-      } catch (error) {
-        alert('Error saving selection.');
+
+        try {
+          const response = await fetch('http://localhost:3000/api/history', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              style: this.selectedStyle,
+              room: this.selectedRoom,
+              color: this.selectedColor,
+            }),
+          });
+
+          if (response.ok) {
+            alert('Selection saved!');
+            this.$router.push('/about');
+          } else {
+            alert('Failed to save selection.');
+          }
+        } catch (error) {
+          alert('Error saving selection.');
+        }
+      } else {
+        alert('Please select a style, room, and color before confirming.');
       }
-    } else {
-      alert('Please select a style, room, and color before confirming.');
     }
-  }
   }
 };
 </script>
