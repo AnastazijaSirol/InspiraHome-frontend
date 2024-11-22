@@ -188,7 +188,6 @@ export default {
 };
 </script>
 
-
 <style>
 .white-text {
   color: #f3f3f3;
