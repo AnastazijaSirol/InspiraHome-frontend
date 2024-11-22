@@ -1,121 +1,122 @@
 <template>
-    <div class="header-menu">
-      <div v-if="isAuthenticated" class="header-dropdown">
-        <button class="header-dropdown-btn">Menu</button>
-        <div class="header-dropdown-content">
-          <button @click="navigateTo('/')">Home</button>
-          <button @click="navigateTo('/profile')">Profile</button>
-          <button @click="navigateTo('/group-chats')">Group Chats</button>
-          <button @click="navigateTo('/designers')">Designers</button>
-          <button @click="navigateTo('/competitions')">Competitions</button>
-          <button @click="navigateTo('/quiz')">Quiz</button>
-        </div>
-      </div>
-      <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">
-        Log Out
-      </button>
-    </div>
-    <div class="quiz-container">
-      <h1>Style Quiz</h1>
-      <div v-if="existingStyle">
-        <h2>Your Style is: {{ existingStyle }}</h2>
-        <p>{{ styleDescriptions[existingStyle] }}</p>
-      </div>
-      <div v-else-if="currentQuestionIndex < questions.length">
-        <h2>{{ questions[currentQuestionIndex].question }}</h2>
-        <ul v-for="(answer, index) in questions[currentQuestionIndex].answers" 
-            :key="index" 
-            @click="selectAnswer(index)"
-            class="answer-option">
-          {{ answer }}
-        </ul>
-      </div>
-      <div class="result" v-else>
-        <h2>Your Style is: {{ resultStyle }}</h2>
-        <p>{{ styleDescriptions[resultStyle] }}</p>
+  <div class="header-menu">
+    <div v-if="isAuthenticated" class="header-dropdown">
+      <button class="header-dropdown-btn">Menu</button>
+      <div class="header-dropdown-content">
+        <button @click="navigateTo('/')">Home</button>
+        <button @click="navigateTo('/profile')">Profile</button>
+        <button @click="navigateTo('/group-chats')">Group Chats</button>
+        <button @click="navigateTo('/designers')">Designers</button>
+        <button @click="navigateTo('/competitions')">Competitions</button>
+        <button @click="navigateTo('/quiz')">Quiz</button>
       </div>
     </div>
-  </template>  
-  
-  <script>
-  import axios from 'axios';
-  export default {
-    name: "QuizPage",
-    data() {
-      return {
-        isAuthenticated: !!localStorage.getItem("token"),
-        currentQuestionIndex: 0,
-        answers: [],
-        existingStyle: null,
-        questions: [
-          {
-            question: "What's your ideal living room decor?",
-            answers: [
-              "Sleek furniture with clean lines and neutral tones",
-              "Functional and clutter-free with few statement pieces",
-              "Elegant furniture and warm, earthy tones",
-              "Colorful textiles, eclectic patterns, and plants",
-              "Rich wood furniture and classic decor",
-              "Light colors, simple furniture, and cozy textiles"
-            ]
-          },
-          {
-            question: "What kind of art would you hang on your walls?",
-            answers: [
-              "Abstract, bold designs",
-              "Minimalistic black-and-white photography",
-              "Vintage posters or oil paintings",
-              "Bohemian macrame or handcrafted art",
-              "Traditional family portraits or landscapes",
-              "Scandinavian geometric patterns or nature photography"
-            ]
-          },
-          {
-            question: "What's your preferred type of lighting?",
-            answers: [
-              "Recessed or track lighting for a sleek look",
-              "Simple and functional with a focus on natural light",
-              "Chandeliers or antique lamps",
-              "Fairy lights, lanterns, or candles",
-              "Classic lamps with elegant shades",
-              "Pendant lighting with clean, modern lines"
-            ]
-          },
-          {
-            question: "What's your dream sofa?",
-            answers: [
-              "A sleek leather sectional",
-              "A compact, simple gray or beige sofa",
-              "A tufted velvet sofa in deep tones",
-              "A colorful or patterned fabric sofa",
-              "A high-back, classic-style sofa",
-              "A soft, neutral, overstuffed sofa"
-            ]
-          },
-          {
-            question: "Which accessory would you add to your space?",
-            answers: [
-              "Metallic accents or a glass coffee table",
-              "A statement vase or bowl",
-              "Vintage clocks or ornate mirrors",
-              "Woven rugs, dreamcatchers, or hanging plants",
-              "Porcelain figurines or traditional sculptures",
-              "Cozy blankets and minimalistic planters"
-            ]
-          }
-        ],
-        styles: ["Modern", "Minimalistic", "Vintage", "Boho", "Traditional", "Scandinavian"],
-        styleDescriptions: {
-          Modern: "You love sleek, clean designs with neutral tones and cutting-edge furniture.",
-          Minimalistic: "You prefer simple, functional spaces with clutter-free designs.",
-          Vintage: "You enjoy elegant, timeless decor with a nostalgic flair.",
-          Boho: "You thrive in eclectic, colorful spaces filled with art and plants.",
-          Traditional: "You favor rich, classic decor that exudes warmth and elegance.",
-          Scandinavian: "You love light, airy spaces with cozy textiles and functional furniture."
+    <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">
+      Log Out
+    </button>
+  </div>
+  <div class="quiz-container">
+    <h1>Style Quiz</h1>
+    <div v-if="existingStyle">
+      <h2>Your Style is: {{ existingStyle }}</h2>
+      <p>{{ styleDescriptions[existingStyle] }}</p>
+    </div>
+    <div v-else-if="currentQuestionIndex < questions.length">
+      <h2>{{ questions[currentQuestionIndex].question }}</h2>
+      <ul v-for="(answer, index) in questions[currentQuestionIndex].answers" 
+          :key="index" 
+          @click="selectAnswer(index)"
+          class="answer-option">
+        {{ answer }}
+      </ul>
+    </div>
+    <div class="result" v-else>
+      <h2>Your Style is: {{ resultStyle }}</h2>
+      <p>{{ styleDescriptions[resultStyle] }}</p>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  name: "QuizPage",
+  data() {
+    return {
+      isAuthenticated: !!localStorage.getItem("token"),
+      currentQuestionIndex: 0,
+      answers: [],
+      existingStyle: null,
+      questions: [
+        {
+          question: "What's your ideal living room decor?",
+          answers: [
+            "Sleek furniture with clean lines and neutral tones",
+            "Functional and clutter-free with few statement pieces",
+            "Elegant furniture and warm, earthy tones",
+            "Colorful textiles, eclectic patterns, and plants",
+            "Rich wood furniture and classic decor",
+            "Light colors, simple furniture, and cozy textiles"
+          ]
+        },
+        {
+          question: "What kind of art would you hang on your walls?",
+          answers: [
+            "Abstract, bold designs",
+            "Minimalistic black-and-white photography",
+            "Vintage posters or oil paintings",
+            "Bohemian macrame or handcrafted art",
+            "Traditional family portraits or landscapes",
+            "Scandinavian geometric patterns or nature photography"
+          ]
+        },
+        {
+          question: "What's your preferred type of lighting?",
+          answers: [
+            "Recessed or track lighting for a sleek look",
+            "Simple and functional with a focus on natural light",
+            "Chandeliers or antique lamps",
+            "Fairy lights, lanterns, or candles",
+            "Classic lamps with elegant shades",
+            "Pendant lighting with clean, modern lines"
+          ]
+        },
+        {
+          question: "What's your dream sofa?",
+          answers: [
+            "A sleek leather sectional",
+            "A compact, simple gray or beige sofa",
+            "A tufted velvet sofa in deep tones",
+            "A colorful or patterned fabric sofa",
+            "A high-back, classic-style sofa",
+            "A soft, neutral, overstuffed sofa"
+          ]
+        },
+        {
+          question: "Which accessory would you add to your space?",
+          answers: [
+            "Metallic accents or a glass coffee table",
+            "A statement vase or bowl",
+            "Vintage clocks or ornate mirrors",
+            "Woven rugs, dreamcatchers, or hanging plants",
+            "Porcelain figurines or traditional sculptures",
+            "Cozy blankets and minimalistic planters"
+          ]
         }
-      };
-    },
-    computed: {
+      ],
+      styles: ["Modern", "Minimalistic", "Vintage", "Boho", "Traditional", "Scandinavian"],
+      styleDescriptions: {
+        Modern: "You love sleek, clean designs with neutral tones and cutting-edge furniture.",
+        Minimalistic: "You prefer simple, functional spaces with clutter-free designs.",
+        Vintage: "You enjoy elegant, timeless decor with a nostalgic flair.",
+        Boho: "You thrive in eclectic, colorful spaces filled with art and plants.",
+        Traditional: "You favor rich, classic decor that exudes warmth and elegance.",
+        Scandinavian: "You love light, airy spaces with cozy textiles and functional furniture."
+      }
+    };
+  },
+  computed: {
     resultStyle() {
       if (this.existingStyle) {
         return this.existingStyle; 
@@ -150,7 +151,7 @@
       }
     },
     selectAnswer(answerIndex) {
-      if (this.existingStyle) return; // Prevent further interaction
+      if (this.existingStyle) return; 
       this.answers.push(answerIndex);
       this.currentQuestionIndex++;
     },
@@ -164,7 +165,7 @@
       this.$router.push("/");
     },
     async saveResult(style) {
-      if (this.existingStyle) return; // Prevent saving if result exists
+      if (this.existingStyle) return; 
       try {
         const token = localStorage.getItem("token");
         await axios.post(
@@ -188,10 +189,10 @@
       await this.fetchQuizResult(); 
     }
   }
-  };
-  </script>
-  
-  <style scoped>
+};
+</script>
+
+<style scoped>
   .header-menu {
     display: flex;
     align-items: center;
@@ -273,7 +274,7 @@
     margin: 20px auto;
     max-width: 600px;
     color: white;
-    font-size: 1.5erm;
+    font-size: 1.5rem;
   }
 
   h1 {
