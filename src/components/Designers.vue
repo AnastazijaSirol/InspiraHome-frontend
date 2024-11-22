@@ -12,7 +12,11 @@
           <button @click="navigateTo('/quiz')">Quiz</button>
         </div>
       </div>
-      <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">
+      <button
+        v-if="isAuthenticated"
+        class="logout-btn"
+        @click="handleLogout"
+      >
         Log Out
       </button>
     </div>
@@ -110,8 +114,6 @@ export default {
     },
     async showDesignerImages(designer) {
       this.selectedDesigner = designer;
-
-      console.log("Selected designer:", designer);
 
       if (!designer || !designer.id || isNaN(designer.id)) {
         console.error("Invalid designer ID:", designer?.id);
