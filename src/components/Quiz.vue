@@ -33,6 +33,7 @@
     <div class="result" v-else>
       <h2>Your Style is: {{ resultStyle }}</h2>
       <p>{{ styleDescriptions[resultStyle] }}</p>
+      <button @click="saveResult(resultStyle)">Save Result</button>
     </div>
   </div>
 </template>
@@ -154,6 +155,10 @@ export default {
       if (this.existingStyle) return; 
       this.answers.push(answerIndex);
       this.currentQuestionIndex++;
+      
+      if (this.currentQuestionIndex === this.questions.length) {
+        this.saveResult(this.resultStyle);
+      }
     },
     navigateTo(route) {
       this.$router.push(route);
@@ -191,6 +196,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
   .header-menu {
