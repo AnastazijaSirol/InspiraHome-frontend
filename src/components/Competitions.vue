@@ -5,7 +5,6 @@
   
       <div v-if="isAddCompetitionModalOpen" class="modal" @click="closeAddCompetitionModal">
         <div class="modal-content" @click.stop>
-          <h2>Add New Competition</h2>
           <form @submit.prevent="submitCompetition">
             <div class="form-group">
               <label for="competitionName">Name:</label>
@@ -31,10 +30,24 @@
       <div class="competition-list">
         <div v-for="competition in competitions" :key="competition.id" class="competition-box">
           <h3>{{ competition.name }}</h3>
-          <p>{{ formatDate(competition.date) }}</p>
+          <p>Open until: {{ formatDate(competition.date) }}</p>
           <div class="image-container">
             <img v-if="competition.image" :src="'data:image/jpeg;base64,' + competition.image" alt="Competition Image" width="100" @click="openImageModal(competition.image)" />
           </div>
+          <button class="join-btn" @click="openJoinModal(competition.id)">Join competition</button>
+        </div>
+      </div>
+
+      <div v-if="isJoinModalOpen" class="modal" @click="closeJoinModal">
+        <div class="modal-content" @click.stop>
+          <form @submit.prevent="submitJoinCompetition">
+            <div class="form-group">
+              <label for="competitionDescription">Description:</label>
+              <textarea id="competitionDescription" v-model="joinDescription" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">Submit</button>
+            <button type="button" class="cancel-btn" @click="closeJoinModal">Cancel</button>
+          </form>
         </div>
       </div>
   
@@ -45,117 +58,150 @@
       </div>
     </div>
   </template>
-      
-      <script>
-      import axios from "axios";
-      
-      export default {
-        name: "CompetitionsPage",
-        data() {
-          return {
-            isDesigner: false,
-            isAddCompetitionModalOpen: false,
-            isImageModalOpen: false,
-            selectedImage: null,
-            newCompetition: {
-              name: "",
-              date: "",
-              image: null,
-            },
-            competitions: [],
-          };
+  
+  <script>
+  import axios from "axios";
+  
+  export default {
+    name: "CompetitionsPage",
+    data() {
+      return {
+        isDesigner: false,
+        isAddCompetitionModalOpen: false,
+        isImageModalOpen: false,
+        isJoinModalOpen: false,
+        selectedImage: null,
+        joinDescription: "", 
+        competitionIdToJoin: null, 
+        newCompetition: {
+          name: "",
+          date: "",
+          image: null,
         },
-        methods: {
-          async checkIfDesigner() {
-            try {
-              const token = localStorage.getItem("token");
-              if (!token) return;
-      
-              const response = await axios.get("http://localhost:3000/api/profile", {
-                headers: { Authorization: `Bearer ${token}` },
-              });
-      
-              this.isDesigner = response.data.isDesigner || false;
-            } catch (error) {
-              console.error("Error checking designer status:", error);
-            }
-          },
-      
-          async fetchCompetitions() {
-            try {
-              const response = await axios.get("http://localhost:3000/api/competitions");
-              this.competitions = response.data;
-            } catch (error) {
-              console.error("Error fetching competitions:", error);
-            }
-          },
-      
-          openAddCompetitionModal() {
-            this.isAddCompetitionModalOpen = true;
-          },
-      
-          closeAddCompetitionModal() {
-            this.isAddCompetitionModalOpen = false;
-            this.newCompetition = { name: "", date: "", image: null };
-          },
-      
-          handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                this.newCompetition.image = e.target.result.split(",")[1];
-              };
-              reader.readAsDataURL(file);
-            }
-          },
-      
-          async submitCompetition() {
-            try {
-              const token = localStorage.getItem("token");
-              const response = await axios.post(
-                "http://localhost:3000/api/competitions",
-                {
-                  name: this.newCompetition.name,
-                  date: this.newCompetition.date,
-                  image: this.newCompetition.image,
-                },
-                {
-                  headers: { Authorization: `Bearer ${token}` },
-                }
-              );
-              console.log("Competition added successfully:", response.data);
-              alert("Competition added successfully!");
-              this.closeAddCompetitionModal();
-              this.fetchCompetitions();
-            } catch (error) {
-              console.error("Error adding competition:", error);
-              alert("Failed to add competition. Please try again.");
-            }
-          },
-      
-          formatDate(dateString) {
-            const options = { year: "numeric", month: "2-digit", day: "2-digit" };
-            const date = new Date(dateString);
-            return date.toLocaleDateString(undefined, options);
-          },
-      
-          openImageModal(image) {
-            this.selectedImage = image;
-            this.isImageModalOpen = true;
-          },
-      
-          closeImageModal() {
-            this.isImageModalOpen = false;
-            this.selectedImage = null;
-          },
-        },
-        created() {
-          this.checkIfDesigner();
-          this.fetchCompetitions();
-        },
+        competitions: [],
       };
-      </script>
+    },
+    methods: {
+      async checkIfDesigner() {
+        try {
+          const token = localStorage.getItem("token");
+          if (!token) return;
+  
+          const response = await axios.get("http://localhost:3000/api/profile", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+  
+          this.isDesigner = response.data.isDesigner || false;
+        } catch (error) {
+          console.error("Error checking designer status:", error);
+        }
+      },
+  
+      async fetchCompetitions() {
+        try {
+          const response = await axios.get("http://localhost:3000/api/competitions");
+          this.competitions = response.data;
+        } catch (error) {
+          console.error("Error fetching competitions:", error);
+        }
+      },
+  
+      openJoinModal(competitionId) {
+        this.competitionIdToJoin = competitionId;
+        this.isJoinModalOpen = true;
+      },
+  
+      closeJoinModal() {
+        this.isJoinModalOpen = false;
+        this.joinDescription = ""; 
+      },
+  
+      async submitJoinCompetition() {
+        try {
+          const token = localStorage.getItem("token");
+          await axios.post(
+            `http://localhost:3000/api/competitions/${this.competitionIdToJoin}/join`,
+            { description: this.joinDescription },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          alert("You have successfully joined the competition!");
+          this.fetchCompetitions();
+          this.closeJoinModal();
+        } catch (error) {
+          const errorMessage = error.response ? error.response.data.message : error.message;
+          console.error("Error joining competition:", errorMessage);
+          alert(`Failed to join the competition: ${errorMessage}`);
+        }
+      },
+  
+      openAddCompetitionModal() {
+        this.isAddCompetitionModalOpen = true;
+      },
+  
+      closeAddCompetitionModal() {
+        this.isAddCompetitionModalOpen = false;
+        this.newCompetition = { name: "", date: "", image: null };
+      },
+  
+      handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.newCompetition.image = e.target.result.split(",")[1];
+          };
+          reader.readAsDataURL(file);
+        }
+      },
+  
+      async submitCompetition() {
+        try {
+          const token = localStorage.getItem("token");
+          const response = await axios.post(
+            "http://localhost:3000/api/competitions",
+            {
+              name: this.newCompetition.name,
+              date: this.newCompetition.date,
+              image: this.newCompetition.image,
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          console.log("Competition added successfully:", response.data);
+          alert("Competition added successfully!");
+          this.closeAddCompetitionModal();
+          this.fetchCompetitions();
+        } catch (error) {
+          console.error("Error adding competition:", error);
+          alert("Failed to add competition. Please try again.");
+        }
+      },
+  
+      formatDate(dateString) {
+        const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+        const date = new Date(dateString);
+        return date.toLocaleDateString(undefined, options);
+      },
+  
+      openImageModal(image) {
+        this.selectedImage = image;
+        this.isImageModalOpen = true;
+      },
+  
+      closeImageModal() {
+        this.isImageModalOpen = false;
+        this.selectedImage = null;
+      },
+    },
+    created() {
+      this.checkIfDesigner();
+      this.fetchCompetitions();
+    },
+  };
+  </script>  
       
       <style scoped>
       .competitions {
@@ -273,6 +319,20 @@
       
       .cancel-btn:hover {
         background-color: #999;
+      }
+
+      .join-btn {
+        background-color: #28a745; 
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      .join-btn:hover {
+        background-color: #218838; 
       }
       </style>
       
