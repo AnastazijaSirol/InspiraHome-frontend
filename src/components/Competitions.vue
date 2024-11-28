@@ -1,59 +1,76 @@
 <template>
-    <div class="competitions">
-      <h1>Competitions</h1>
-      <button v-if="isDesigner" @click="openAddCompetitionModal">Add Competition</button>
-  
-      <div v-if="isAddCompetitionModalOpen" class="modal" @click="closeAddCompetitionModal">
-        <div class="modal-content" @click.stop>
-          <form @submit.prevent="submitCompetition">
-            <div class="form-group">
-              <label for="competitionName">Name:</label>
-              <input type="text" id="competitionName" v-model="newCompetition.name" required />
-            </div>
-  
-            <div class="form-group">
-              <label for="competitionDate">Date:</label>
-              <input type="date" id="competitionDate" v-model="newCompetition.date" required />
-            </div>
-  
-            <div class="form-group">
-              <label for="competitionImage">Image:</label>
-              <input type="file" id="competitionImage" @change="handleImageUpload" accept="image/*" required />
-            </div>
-  
-            <button type="submit" class="submit-btn">Submit</button>
-            <button type="button" class="cancel-btn" @click="closeAddCompetitionModal">Cancel</button>
-          </form>
-        </div>
-      </div>
-  
-      <div class="competition-list">
-        <div v-for="competition in competitions" :key="competition.id" class="competition-box">
-          <h3>{{ competition.name }}</h3>
-          <p>Open until: {{ formatDate(competition.date) }}</p>
-          <div class="image-container">
-            <img v-if="competition.image" :src="'data:image/jpeg;base64,' + competition.image" alt="Competition Image" width="100" @click="openImageModal(competition.image)" />
+    <div>
+      <div class="header-menu">
+        <div v-if="isAuthenticated" class="header-dropdown">
+          <button class="header-dropdown-btn">Menu</button>
+          <div class="header-dropdown-content">
+            <button @click="navigateTo('/')">Home</button>
+            <button @click="navigateTo('/profile')">Profile</button>
+            <button @click="navigateTo('/group-chats')">Group Chats</button>
+            <button @click="navigateTo('/designers')">Designers</button>
+            <button @click="navigateTo('/competitions')">Competitions</button>
+            <button @click="navigateTo('/quiz')">Quiz</button>
           </div>
-          <button class="join-btn" @click="openJoinModal(competition.id)">Join competition</button>
         </div>
+        <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">Log Out</button>
       </div>
 
-      <div v-if="isJoinModalOpen" class="modal" @click="closeJoinModal">
-        <div class="modal-content" @click.stop>
-          <form @submit.prevent="submitJoinCompetition">
-            <div class="form-group">
-              <label for="competitionDescription">Description:</label>
-              <textarea id="competitionDescription" v-model="joinDescription" required></textarea>
-            </div>
-            <button type="submit" class="submit-btn">Submit</button>
-            <button type="button" class="cancel-btn" @click="closeJoinModal">Cancel</button>
-          </form>
+      <div class="competitions">
+        <h1>Competitions</h1>
+        <button v-if="isDesigner" @click="openAddCompetitionModal">Add Competition</button>
+    
+        <div v-if="isAddCompetitionModalOpen" class="modal" @click="closeAddCompetitionModal">
+          <div class="modal-content" @click.stop>
+            <form @submit.prevent="submitCompetition">
+              <div class="form-group">
+                <label for="competitionName">Name:</label>
+                <input type="text" id="competitionName" v-model="newCompetition.name" required />
+              </div>
+    
+              <div class="form-group">
+                <label for="competitionDate">Date:</label>
+                <input type="date" id="competitionDate" v-model="newCompetition.date" required />
+              </div>
+    
+              <div class="form-group">
+                <label for="competitionImage">Image:</label>
+                <input type="file" id="competitionImage" @change="handleImageUpload" accept="image/*" required />
+              </div>
+    
+              <button type="submit" class="submit-btn">Submit</button>
+              <button type="button" class="cancel-btn" @click="closeAddCompetitionModal">Cancel</button>
+            </form>
+          </div>
         </div>
-      </div>
+    
+        <div class="competition-list">
+          <div v-for="competition in competitions" :key="competition.id" class="competition-box">
+            <h3>{{ competition.name }}</h3>
+            <p>Open until: {{ formatDate(competition.date) }}</p>
+            <div class="image-container">
+              <img v-if="competition.image" :src="'data:image/jpeg;base64,' + competition.image" alt="Competition Image" width="100" @click="openImageModal(competition.image)" />
+            </div>
+            <button class="join-btn" @click="openJoinModal(competition.id)">Join competition</button>
+          </div>
+        </div>
   
-      <div v-if="isImageModalOpen" class="image-modal" @click="closeImageModal">
-        <div class="modal-content" @click.stop>
-          <img :src="'data:image/jpeg;base64,' + selectedImage" alt="Competition Image" class="modal-image" />
+        <div v-if="isJoinModalOpen" class="modal" @click="closeJoinModal">
+          <div class="modal-content" @click.stop>
+            <form @submit.prevent="submitJoinCompetition">
+              <div class="form-group">
+                <label for="competitionDescription">Description:</label>
+                <textarea id="competitionDescription" v-model="joinDescription" required></textarea>
+              </div>
+              <button type="submit" class="submit-btn">Submit</button>
+              <button type="button" class="cancel-btn" @click="closeJoinModal">Cancel</button>
+            </form>
+          </div>
+        </div>
+    
+        <div v-if="isImageModalOpen" class="image-modal" @click="closeImageModal">
+          <div class="modal-content" @click.stop>
+            <img :src="'data:image/jpeg;base64,' + selectedImage" alt="Competition Image" class="modal-image" />
+          </div>
         </div>
       </div>
     </div>
@@ -66,6 +83,7 @@
     name: "CompetitionsPage",
     data() {
       return {
+        isAuthenticated: false, 
         isDesigner: false,
         isAddCompetitionModalOpen: false,
         isImageModalOpen: false,
@@ -195,144 +213,238 @@
         this.isImageModalOpen = false;
         this.selectedImage = null;
       },
+  
+      navigateTo(route) {
+        this.$router.push(route); 
+      },
+  
+      handleLogout() {
+        localStorage.removeItem("token"); 
+        this.isAuthenticated = false;
+        alert("Logged out successfully!");
+      },
     },
     created() {
+      const token = localStorage.getItem("token");
+      this.isAuthenticated = !!token; 
       this.checkIfDesigner();
       this.fetchCompetitions();
     },
   };
-  </script>  
-      
-      <style scoped>
-      .competitions {
-        text-align: center;
-        padding: 20px;
-        color: white;
-      }
-      
-      button {
-        margin-top: 10px;
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-      
-      button:hover {
-        background-color: #0056b3;
-      }
-      
-      .competition-list {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      
-      .competition-box {
-        background-color: #f0f0f0;
-        color: #333;
-        margin: 15px;
-        padding: 15px;
-        border-radius: 8px;
-        width: 250px;
-        text-align: center;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-      
-      .competition-box h3 {
-        font-size: 18px;
-        margin-bottom: 10px;
-      }
-      
-      .competition-box p {
-        font-size: 14px;
-        margin-bottom: 15px;
-      }
-      
-      .image-container img {
-        cursor: pointer;
-        border-radius: 5px;
-      }
-      
-      .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      
-      .modal-content {
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        width: 500px;
-      }
-      
-      .modal-image {
-        max-width: 100%;
-        height: auto;
-        border-radius: 8px;
-      }
+  </script>
+        
+<style scoped>
+  .header-menu {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 10px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+  }
 
-      .image-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000; 
-      }
-      
-      .submit-btn {
-        background-color: #007bff;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-      
-      .cancel-btn {
-        background-color: #ccc;
-        color: black;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-left: 10px;
-      }
-      
-      .submit-btn:hover {
-        background-color: #0056b3;
-      }
-      
-      .cancel-btn:hover {
-        background-color: #999;
-      }
+  .logout-btn {
+    padding: 10px 20px;
+    background-color: #ff4500;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    margin-right: 20px;
+  }
 
-      .join-btn {
-        background-color: #28a745; 
-        color: white;
-        padding: 8px 16px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-top: 10px;
-      }
+  .logout-btn:hover {
+    background-color: #ff2e00;
+  }
 
-      .join-btn:hover {
-        background-color: #218838; 
-      }
-      </style>
-      
+  .header-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .header-dropdown-btn {
+    background-color: #ffa500;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    padding: 10px 20px;
+    box-sizing: border-box;
+  }
+
+  .header-dropdown-btn:hover {
+    background-color: #ff8c00;
+  }
+
+  .header-dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #333;
+    color: white;
+    min-width: 150px;
+    border-radius: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .header-dropdown-content button {
+    width: 100%;
+    padding: 10px;
+    color: white;
+    background-color: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    box-sizing: border-box;
+  }
+
+  .header-dropdown-content button:hover {
+    background-color: #333;
+  }
+
+  .header-dropdown:hover .header-dropdown-content {
+    display: block;
+  }
+
+  .competitions {
+    text-align: center;
+    padding: 20px;
+    color: white;
+  }
+
+  button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  .competition-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .competition-box {
+    background-color: #f0f0f0;
+    color: #333;
+    margin: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    width: 250px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .competition-box h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .competition-box p {
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+
+  .image-container img {
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 500px;
+  }
+
+  .modal-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .image-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .submit-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .cancel-btn {
+    background-color: #ccc;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+  }
+
+  .submit-btn:hover {
+    background-color: #0056b3;
+  }
+
+  .cancel-btn:hover {
+    background-color: #999;
+  }
+
+  .join-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .join-btn:hover {
+    background-color: #218838;
+  }
+</style>
