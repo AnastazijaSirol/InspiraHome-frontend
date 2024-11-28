@@ -136,21 +136,21 @@
   
       async submitJoinCompetition() {
         try {
-          const token = localStorage.getItem("token");
-          await axios.post(
+            const token = localStorage.getItem("token");
+            await axios.post(
             `http://localhost:3000/api/competitions/${this.competitionIdToJoin}/join`,
-            { description: this.joinDescription },
+            { description: this.joinDescription },  
             {
-              headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${token}` },
             }
-          );
-          alert("You have successfully joined the competition!");
-          this.fetchCompetitions();
-          this.closeJoinModal();
+            );
+            alert("You have successfully joined the competition!");
+            this.fetchCompetitions();  
+            this.closeJoinModal();  
         } catch (error) {
-          const errorMessage = error.response ? error.response.data.message : error.message;
-          console.error("Error joining competition:", errorMessage);
-          alert(`Failed to join the competition: ${errorMessage}`);
+            const errorMessage = error.response ? error.response.data.message : error.message;
+            console.error("Error joining competition:", errorMessage);
+            alert(`Failed to join the competition: ${errorMessage}`);
         }
       },
   
