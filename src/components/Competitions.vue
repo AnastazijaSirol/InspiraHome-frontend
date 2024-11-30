@@ -14,11 +14,12 @@
         </div>
         <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">Log Out</button>
       </div>
-
+  
       <div class="competitions">
         <h1>Competitions</h1>
         <button v-if="isDesigner" @click="openAddCompetitionModal">Add Competition</button>
-    
+        <h2>Participate in the competition by writing what you see in the picture.</h2>
+  
         <div v-if="isAddCompetitionModalOpen" class="modal" @click="closeAddCompetitionModal">
           <div class="modal-content" @click.stop>
             <form @submit.prevent="submitCompetition">
@@ -51,6 +52,14 @@
               <img v-if="competition.image" :src="'data:image/jpeg;base64,' + competition.image" alt="Competition Image" width="100" @click="openImageModal(competition.image)" />
             </div>
             <button class="join-btn" @click="openJoinModal(competition.id)">Join competition</button>
+            
+            <h4>Descriptions:</h4>
+            <div v-if="competition.descriptions && competition.descriptions.length > 0">
+              <p v-for="desc in competition.descriptions" :key="desc.id">
+                <strong>{{ desc.User.username }}:</strong> {{ desc.description }}
+              </p>
+            </div>
+            <p v-else>No descriptions yet.</p>
           </div>
         </div>
   
@@ -83,14 +92,14 @@
     name: "CompetitionsPage",
     data() {
       return {
-        isAuthenticated: false, 
+        isAuthenticated: false,
         isDesigner: false,
         isAddCompetitionModalOpen: false,
         isImageModalOpen: false,
         isJoinModalOpen: false,
         selectedImage: null,
-        joinDescription: "", 
-        competitionIdToJoin: null, 
+        joinDescription: "",
+        competitionIdToJoin: null,
         newCompetition: {
           name: "",
           date: "",
@@ -118,9 +127,27 @@
       async fetchCompetitions() {
         try {
           const response = await axios.get("http://localhost:3000/api/competitions");
-          this.competitions = response.data;
+          const competitions = response.data;
+  
+          // Dohvati opise za svako natjecanje
+          for (const competition of competitions) {
+            competition.descriptions = await this.fetchDescriptions(competition.id);
+          }
+  
+          this.competitions = competitions;
         } catch (error) {
           console.error("Error fetching competitions:", error);
+        }
+      },
+  
+      async fetchDescriptions(competitionId) {
+        try {
+          const response = await axios.get(`http://localhost:3000/api/competitions/${competitionId}/descriptions`);
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching descriptions:", error);
+          alert("Failed to load descriptions for the competition.");
+          return [];
         }
       },
   
@@ -131,26 +158,26 @@
   
       closeJoinModal() {
         this.isJoinModalOpen = false;
-        this.joinDescription = ""; 
+        this.joinDescription = "";
       },
   
       async submitJoinCompetition() {
         try {
-            const token = localStorage.getItem("token");
-            await axios.post(
+          const token = localStorage.getItem("token");
+          await axios.post(
             `http://localhost:3000/api/competitions/${this.competitionIdToJoin}/join`,
-            { description: this.joinDescription },  
+            { description: this.joinDescription },
             {
-                headers: { Authorization: `Bearer ${token}` },
+              headers: { Authorization: `Bearer ${token}` },
             }
-            );
-            alert("You have successfully joined the competition!");
-            this.fetchCompetitions();  
-            this.closeJoinModal();  
+          );
+          alert("You have successfully joined the competition!");
+          this.fetchCompetitions();
+          this.closeJoinModal();
         } catch (error) {
-            const errorMessage = error.response ? error.response.data.message : error.message;
-            console.error("Error joining competition:", errorMessage);
-            alert(`Failed to join the competition: ${errorMessage}`);
+          const errorMessage = error.response ? error.response.data.message : error.message;
+          console.error("Error joining competition:", errorMessage);
+          alert(`Failed to join the competition: ${errorMessage}`);
         }
       },
   
@@ -177,7 +204,7 @@
       async submitCompetition() {
         try {
           const token = localStorage.getItem("token");
-          const response = await axios.post(
+          await axios.post(
             "http://localhost:3000/api/competitions",
             {
               name: this.newCompetition.name,
@@ -188,7 +215,6 @@
               headers: { Authorization: `Bearer ${token}` },
             }
           );
-          console.log("Competition added successfully:", response.data);
           alert("Competition added successfully!");
           this.closeAddCompetitionModal();
           this.fetchCompetitions();
@@ -215,24 +241,24 @@
       },
   
       navigateTo(route) {
-        this.$router.push(route); 
+        this.$router.push(route);
       },
   
       handleLogout() {
-        localStorage.removeItem("token"); 
+        localStorage.removeItem("token");
         this.isAuthenticated = false;
         alert("Logged out successfully!");
       },
     },
     created() {
       const token = localStorage.getItem("token");
-      this.isAuthenticated = !!token; 
+      this.isAuthenticated = !!token;
       this.checkIfDesigner();
       this.fetchCompetitions();
     },
   };
   </script>
-        
+          
 <style scoped>
   .header-menu {
     display: flex;
