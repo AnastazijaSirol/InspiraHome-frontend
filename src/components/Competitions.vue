@@ -51,7 +51,12 @@
             <div class="image-container">
               <img v-if="competition.image" :src="'data:image/jpeg;base64,' + competition.image" alt="Competition Image" width="100" @click="openImageModal(competition.image)" />
             </div>
-            <button class="join-btn" @click="openJoinModal(competition.id)">Join competition</button>
+            <button 
+                v-if="isCompetitionOpen(competition.date)" 
+                class="join-btn" 
+                @click="openJoinModal(competition.id)">
+                Join competition
+            </button>
             
             <h4>Descriptions:</h4>
             <div v-if="competition.descriptions && competition.descriptions.length > 0">
@@ -109,6 +114,13 @@
       };
     },
     methods: {
+
+      isCompetitionOpen(date) {
+        const currentDate = new Date();
+        const competitionDate = new Date(date);
+        return competitionDate >= currentDate;
+      },
+
       async checkIfDesigner() {
         try {
           const token = localStorage.getItem("token");
@@ -128,8 +140,7 @@
         try {
           const response = await axios.get("http://localhost:3000/api/competitions");
           const competitions = response.data;
-  
-          // Dohvati opise za svako natjecanje
+
           for (const competition of competitions) {
             competition.descriptions = await this.fetchDescriptions(competition.id);
           }
