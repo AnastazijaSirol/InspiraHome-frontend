@@ -270,7 +270,7 @@
   };
   </script>
           
-<style scoped>
+  <style scoped>
   .header-menu {
     display: flex;
     align-items: center;
@@ -484,4 +484,4 @@
   .join-btn:hover {
     background-color: #218838;
   }
-</style>
+  </style>
