@@ -288,7 +288,7 @@ export default {
           });
           alert("Winner selected successfully!");
           this.closePickWinnerModal();
-          this.fetchCompetitions(); // Refresh competitions list
+          this.fetchCompetitions(); 
         } catch (error) {
           console.error("Error selecting winner:", error);
           alert("Failed to select winner. Please try again.");
