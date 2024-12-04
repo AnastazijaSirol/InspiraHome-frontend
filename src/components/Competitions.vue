@@ -46,11 +46,16 @@
             <img v-if="competition.image" :src="'data:image/jpeg;base64,' + competition.image" alt="Competition Image" width="100" @click="openImageModal(competition.image)" />
           </div>
           <button v-if="isCompetitionOpen(competition.date)" class="join-btn" @click="openJoinModal(competition.id)"> Join competition </button>
-          <button v-if="!isCompetitionOpen(competition.date) && isDesigner" @click="openPickWinnerModal(competition)">
+          <button v-if="!isCompetitionOpen(competition.date) && isDesigner && !competition.winner" @click="openPickWinnerModal(competition)">
             Pick Winner
           </button>
-          <h4>Descriptions:</h4>
-          <div v-if="competition.descriptions && competition.descriptions.length > 0">
+          <div v-if="competition.winner">
+            <h4>Winning description:</h4>
+            <p>
+              <strong>{{ competition.winner.User.username }}:</strong> {{ competition.winner.description }}
+            </p>
+          </div>
+          <div v-else-if="competition.descriptions && competition.descriptions.length > 0">
             <p v-for="desc in competition.descriptions" :key="desc.id">
               <strong>{{ desc.User.username }}:</strong> {{ desc.description }}
             </p>
@@ -144,6 +149,9 @@ export default {
         const competitions = response.data;
         for (const competition of competitions) {
           competition.descriptions = await this.fetchDescriptions(competition.id);
+          if (competition.winner) {
+            competition.winner = await this.fetchWinnerDescription(competition.winner);
+          }
         }
         this.competitions = competitions;
       } catch (error) {
@@ -160,6 +168,15 @@ export default {
         return [];
       }
     },
+    async fetchWinnerDescription(winnerId) {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/descriptions/${winnerId}`);
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching winner description:", error);
+        return null;
+      }
+    },
     openJoinModal(competitionId) {
       this.competitionIdToJoin = competitionId;
       this.isJoinModalOpen = true;
@@ -171,13 +188,24 @@ export default {
     async submitJoinCompetition() {
       try {
         const token = localStorage.getItem("token");
-        await axios.post(
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
+
+        const data = {
+          description: this.joinDescription,
+        };
+        console.log("Sending data:", data); 
+
+        const response = await axios.post(
           `http://localhost:3000/api/competitions/${this.competitionIdToJoin}/join`,
-          { description: this.joinDescription },
+          data,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+
+        console.log(response.data); 
         alert("You have successfully joined the competition!");
         this.fetchCompetitions();
         this.closeJoinModal();
@@ -187,6 +215,7 @@ export default {
         alert(`Failed to join the competition: ${errorMessage}`);
       }
     },
+
     openAddCompetitionModal() {
       this.isAddCompetitionModalOpen = true;
     },
