@@ -1,276 +1,290 @@
 <template>
-    <div>
-      <div class="header-menu">
-        <div v-if="isAuthenticated" class="header-dropdown">
-          <button class="header-dropdown-btn">Menu</button>
-          <div class="header-dropdown-content">
-            <button @click="navigateTo('/')">Home</button>
-            <button @click="navigateTo('/profile')">Profile</button>
-            <button @click="navigateTo('/group-chats')">Group Chats</button>
-            <button @click="navigateTo('/designers')">Designers</button>
-            <button @click="navigateTo('/competitions')">Competitions</button>
-            <button @click="navigateTo('/quiz')">Quiz</button>
-          </div>
+  <div>
+    <div class="header-menu">
+      <div v-if="isAuthenticated" class="header-dropdown">
+        <button class="header-dropdown-btn">Menu</button>
+        <div class="header-dropdown-content">
+          <button @click="navigateTo('/')">Home</button>
+          <button @click="navigateTo('/profile')">Profile</button>
+          <button @click="navigateTo('/group-chats')">Group Chats</button>
+          <button @click="navigateTo('/designers')">Designers</button>
+          <button @click="navigateTo('/competitions')">Competitions</button>
+          <button @click="navigateTo('/quiz')">Quiz</button>
         </div>
-        <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">Log Out</button>
       </div>
-  
-      <div class="competitions">
-        <h1>Competitions</h1>
-        <button v-if="isDesigner" @click="openAddCompetitionModal">Add Competition</button>
-        <h2>Participate in the competition by writing what you see in the picture.</h2>
-  
-        <div v-if="isAddCompetitionModalOpen" class="modal" @click="closeAddCompetitionModal">
-          <div class="modal-content" @click.stop>
-            <form @submit.prevent="submitCompetition">
-              <div class="form-group">
-                <label for="competitionName">Name:</label>
-                <input type="text" id="competitionName" v-model="newCompetition.name" required />
-              </div>
-    
-              <div class="form-group">
-                <label for="competitionDate">Date:</label>
-                <input type="date" id="competitionDate" v-model="newCompetition.date" required />
-              </div>
-    
-              <div class="form-group">
-                <label for="competitionImage">Image:</label>
-                <input type="file" id="competitionImage" @change="handleImageUpload" accept="image/*" required />
-              </div>
-    
-              <button type="submit" class="submit-btn">Submit</button>
-              <button type="button" class="cancel-btn" @click="closeAddCompetitionModal">Cancel</button>
-            </form>
-          </div>
-        </div>
-    
-        <div class="competition-list">
-          <div v-for="competition in competitions" :key="competition.id" class="competition-box">
-            <h3>{{ competition.name }}</h3>
-            <p>Open until: {{ formatDate(competition.date) }}</p>
-            <div class="image-container">
-              <img v-if="competition.image" :src="'data:image/jpeg;base64,' + competition.image" alt="Competition Image" width="100" @click="openImageModal(competition.image)" />
+      <button v-if="isAuthenticated" class="logout-btn" @click="handleLogout">Log Out</button>
+    </div>
+    <div class="competitions">
+      <h1>Competitions</h1>
+      <button v-if="isDesigner" @click="openAddCompetitionModal">Add Competition</button>
+      <h2>Participate in the competition by writing what you see in the picture.</h2>
+      <div v-if="isAddCompetitionModalOpen" class="modal" @click="closeAddCompetitionModal">
+        <div class="modal-content" @click.stop>
+          <form @submit.prevent="submitCompetition">
+            <div class="form-group">
+              <label for="competitionName">Name:</label>
+              <input type="text" id="competitionName" v-model="newCompetition.name" required />
             </div>
-            <button 
-                v-if="isCompetitionOpen(competition.date)" 
-                class="join-btn" 
-                @click="openJoinModal(competition.id)">
-                Join competition
-            </button>
-            
-            <h4>Descriptions:</h4>
-            <div v-if="competition.descriptions && competition.descriptions.length > 0">
-              <p v-for="desc in competition.descriptions" :key="desc.id">
-                <strong>{{ desc.User.username }}:</strong> {{ desc.description }}
-              </p>
+            <div class="form-group">
+              <label for="competitionDate">End date:</label>
+              <input type="date" id="competitionDate" v-model="newCompetition.date" required />
             </div>
-            <p v-else>No descriptions yet.</p>
-          </div>
+            <div class="form-group">
+              <label for="competitionImage">Image:</label>
+              <input type="file" id="competitionImage" @change="handleImageUpload" accept="image/*" required />
+            </div>
+            <button type="submit" class="submit-btn">Submit</button>
+            <button type="button" class="cancel-btn" @click="closeAddCompetitionModal">Cancel</button>
+          </form>
         </div>
-  
-        <div v-if="isJoinModalOpen" class="modal" @click="closeJoinModal">
-          <div class="modal-content" @click.stop>
-            <form @submit.prevent="submitJoinCompetition">
-              <div class="form-group">
-                <label for="competitionDescription">Description:</label>
-                <textarea id="competitionDescription" v-model="joinDescription" required></textarea>
-              </div>
-              <button type="submit" class="submit-btn">Submit</button>
-              <button type="button" class="cancel-btn" @click="closeJoinModal">Cancel</button>
-            </form>
+      </div>
+      <div class="competition-list">
+        <div v-for="competition in competitions" :key="competition.id" class="competition-box">
+          <h3>{{ competition.name }}</h3>
+          <p>Open until: {{ formatDate(competition.date) }}</p>
+          <div class="image-container">
+            <img v-if="competition.image" :src="'data:image/jpeg;base64,' + competition.image" alt="Competition Image" width="100" @click="openImageModal(competition.image)" />
           </div>
+          <button v-if="isCompetitionOpen(competition.date)" class="join-btn" @click="openJoinModal(competition.id)"> Join competition </button>
+          <button v-if="!isCompetitionOpen(competition.date) && isDesigner" @click="openPickWinnerModal(competition)">
+            Pick Winner
+          </button>
+          <h4>Descriptions:</h4>
+          <div v-if="competition.descriptions && competition.descriptions.length > 0">
+            <p v-for="desc in competition.descriptions" :key="desc.id">
+              <strong>{{ desc.User.username }}:</strong> {{ desc.description }}
+            </p>
+          </div>
+          <p v-else>No descriptions yet.</p>
         </div>
-    
-        <div v-if="isImageModalOpen" class="image-modal" @click="closeImageModal">
-          <div class="modal-content" @click.stop>
-            <img :src="'data:image/jpeg;base64,' + selectedImage" alt="Competition Image" class="modal-image" />
+      </div>
+      <div v-if="isJoinModalOpen" class="modal" @click="closeJoinModal">
+        <div class="modal-content" @click.stop>
+          <form @submit.prevent="submitJoinCompetition">
+            <div class="form-group">
+              <label for="competitionDescription">Description:</label>
+              <textarea id="competitionDescription" v-model="joinDescription" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">Submit</button>
+            <button type="button" class="cancel-btn" @click="closeJoinModal">Cancel</button>
+          </form>
+        </div>
+      </div>
+      <div v-if="isPickWinnerModalOpen" class="modal" @click="closePickWinnerModal">
+        <div class="modal-content" @click.stop>
+          <h2>Select the Winner</h2>
+          <div class="form-group" v-if="selectedCompetition">
+            <label for="winnerDescription">Select Description:</label>
+            <select id="winnerDescription" v-model="selectedDescription">
+              <option v-for="desc in selectedCompetition.descriptions" :key="desc.id" :value="desc.id">
+                {{ desc.User.username }}: {{ desc.description }}
+              </option>
+            </select>
           </div>
+          <button @click="submitWinner">Submit</button>
+          <button @click="closePickWinnerModal">Cancel</button>
+        </div>
+      </div>
+      <div v-if="isImageModalOpen" class="image-modal" @click="closeImageModal">
+        <div class="modal-content" @click.stop>
+          <img :src="'data:image/jpeg;base64,' + selectedImage" alt="Competition Image" class="modal-image" />
         </div>
       </div>
     </div>
-  </template>
+  </div>
+</template>
   
-  <script>
-  import axios from "axios";
-  
-  export default {
-    name: "CompetitionsPage",
-    data() {
-      return {
-        isAuthenticated: false,
-        isDesigner: false,
-        isAddCompetitionModalOpen: false,
-        isImageModalOpen: false,
-        isJoinModalOpen: false,
-        selectedImage: null,
-        joinDescription: "",
-        competitionIdToJoin: null,
-        newCompetition: {
-          name: "",
-          date: "",
-          image: null,
-        },
-        competitions: [],
-      };
-    },
-    methods: {
+<script>
+import axios from "axios";
 
-      isCompetitionOpen(date) {
-        const currentDate = new Date();
-        const competitionDate = new Date(date);
-        return competitionDate >= currentDate;
+export default {
+  name: "CompetitionsPage",
+  data() {
+    return {
+      isAuthenticated: false,
+      isDesigner: false,
+      isAddCompetitionModalOpen: false,
+      isImageModalOpen: false,
+      isJoinModalOpen: false,
+      isPickWinnerModalOpen: false,
+      selectedImage: null,
+      joinDescription: "",
+      competitionIdToJoin: null,
+      selectedCompetition: null,
+      selectedDescription: null,
+      newCompetition: {
+        name: "",
+        date: "",
+        image: null,
       },
-
-      async checkIfDesigner() {
-        try {
-          const token = localStorage.getItem("token");
-          if (!token) return;
-  
-          const response = await axios.get("http://localhost:3000/api/profile", {
+      competitions: [],
+    };
+  },
+  methods: {
+    isCompetitionOpen(date) {
+      const currentDate = new Date();
+      const competitionDate = new Date(date);
+      return competitionDate >= currentDate;
+    },
+    async checkIfDesigner() {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const response = await axios.get("http://localhost:3000/api/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.isDesigner = response.data.isDesigner || false;
+      } catch (error) {
+        console.error("Error checking designer status:", error);
+      }
+    },
+    async fetchCompetitions() {
+      try {
+        const response = await axios.get("http://localhost:3000/api/competitions");
+        const competitions = response.data;
+        for (const competition of competitions) {
+          competition.descriptions = await this.fetchDescriptions(competition.id);
+        }
+        this.competitions = competitions;
+      } catch (error) {
+        console.error("Error fetching competitions:", error);
+      }
+    },
+    async fetchDescriptions(competitionId) {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/competitions/${competitionId}/descriptions`);
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching descriptions:", error);
+        alert("Failed to load descriptions for the competition.");
+        return [];
+      }
+    },
+    openJoinModal(competitionId) {
+      this.competitionIdToJoin = competitionId;
+      this.isJoinModalOpen = true;
+    },
+    closeJoinModal() {
+      this.isJoinModalOpen = false;
+      this.joinDescription = "";
+    },
+    async submitJoinCompetition() {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post(
+          `http://localhost:3000/api/competitions/${this.competitionIdToJoin}/join`,
+          { description: this.joinDescription },
+          {
             headers: { Authorization: `Bearer ${token}` },
-          });
-  
-          this.isDesigner = response.data.isDesigner || false;
-        } catch (error) {
-          console.error("Error checking designer status:", error);
-        }
-      },
-  
-      async fetchCompetitions() {
-        try {
-          const response = await axios.get("http://localhost:3000/api/competitions");
-          const competitions = response.data;
-
-          for (const competition of competitions) {
-            competition.descriptions = await this.fetchDescriptions(competition.id);
           }
-  
-          this.competitions = competitions;
-        } catch (error) {
-          console.error("Error fetching competitions:", error);
-        }
-      },
-  
-      async fetchDescriptions(competitionId) {
-        try {
-          const response = await axios.get(`http://localhost:3000/api/competitions/${competitionId}/descriptions`);
-          return response.data;
-        } catch (error) {
-          console.error("Error fetching descriptions:", error);
-          alert("Failed to load descriptions for the competition.");
-          return [];
-        }
-      },
-  
-      openJoinModal(competitionId) {
-        this.competitionIdToJoin = competitionId;
-        this.isJoinModalOpen = true;
-      },
-  
-      closeJoinModal() {
-        this.isJoinModalOpen = false;
-        this.joinDescription = "";
-      },
-  
-      async submitJoinCompetition() {
+        );
+        alert("You have successfully joined the competition!");
+        this.fetchCompetitions();
+        this.closeJoinModal();
+      } catch (error) {
+        const errorMessage = error.response ? error.response.data.message : error.message;
+        console.error("Error joining competition:", errorMessage);
+        alert(`Failed to join the competition: ${errorMessage}`);
+      }
+    },
+    openAddCompetitionModal() {
+      this.isAddCompetitionModalOpen = true;
+    },
+    closeAddCompetitionModal() {
+      this.isAddCompetitionModalOpen = false;
+      this.newCompetition = { name: "", date: "", image: null };
+    },
+    handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.newCompetition.image = e.target.result.split(",")[1];
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    async submitCompetition() {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post(
+          "http://localhost:3000/api/competitions",
+          {
+            name: this.newCompetition.name,
+            date: this.newCompetition.date,
+            image: this.newCompetition.image,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        alert("Competition added successfully!");
+        this.closeAddCompetitionModal();
+        this.fetchCompetitions();
+      } catch (error) {
+        console.error("Error adding competition:", error);
+        alert("Failed to add competition. Please try again.");
+      }
+    },
+    formatDate(dateString) {
+      const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+      const date = new Date(dateString);
+      return date.toLocaleDateString(undefined, options);
+    },
+    openImageModal(image) {
+      this.selectedImage = image;
+      this.isImageModalOpen = true;
+    },
+    closeImageModal() {
+      this.isImageModalOpen = false;
+      this.selectedImage = null;
+    },
+    openPickWinnerModal(competition) {
+      this.selectedCompetition = competition;
+      this.isPickWinnerModalOpen = true;
+    },
+    closePickWinnerModal() {
+      this.isPickWinnerModalOpen = false;
+      this.selectedCompetition = null;
+      this.selectedDescription = null;
+    },
+    async submitWinner() {
+      if (this.selectedDescription) {
         try {
           const token = localStorage.getItem("token");
-          await axios.post(
-            `http://localhost:3000/api/competitions/${this.competitionIdToJoin}/join`,
-            { description: this.joinDescription },
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          alert("You have successfully joined the competition!");
-          this.fetchCompetitions();
-          this.closeJoinModal();
+          await axios.post(`http://localhost:3000/api/competitions/${this.selectedCompetition.id}/pick-winner`, {
+            winner: this.selectedDescription
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          alert("Winner selected successfully!");
+          this.closePickWinnerModal();
+          this.fetchCompetitions(); // Refresh competitions list
         } catch (error) {
-          const errorMessage = error.response ? error.response.data.message : error.message;
-          console.error("Error joining competition:", errorMessage);
-          alert(`Failed to join the competition: ${errorMessage}`);
+          console.error("Error selecting winner:", error);
+          alert("Failed to select winner. Please try again.");
         }
-      },
-  
-      openAddCompetitionModal() {
-        this.isAddCompetitionModalOpen = true;
-      },
-  
-      closeAddCompetitionModal() {
-        this.isAddCompetitionModalOpen = false;
-        this.newCompetition = { name: "", date: "", image: null };
-      },
-  
-      handleImageUpload(event) {
-        const file = event.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            this.newCompetition.image = e.target.result.split(",")[1];
-          };
-          reader.readAsDataURL(file);
-        }
-      },
-  
-      async submitCompetition() {
-        try {
-          const token = localStorage.getItem("token");
-          await axios.post(
-            "http://localhost:3000/api/competitions",
-            {
-              name: this.newCompetition.name,
-              date: this.newCompetition.date,
-              image: this.newCompetition.image,
-            },
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          alert("Competition added successfully!");
-          this.closeAddCompetitionModal();
-          this.fetchCompetitions();
-        } catch (error) {
-          console.error("Error adding competition:", error);
-          alert("Failed to add competition. Please try again.");
-        }
-      },
-  
-      formatDate(dateString) {
-        const options = { year: "numeric", month: "2-digit", day: "2-digit" };
-        const date = new Date(dateString);
-        return date.toLocaleDateString(undefined, options);
-      },
-  
-      openImageModal(image) {
-        this.selectedImage = image;
-        this.isImageModalOpen = true;
-      },
-  
-      closeImageModal() {
-        this.isImageModalOpen = false;
-        this.selectedImage = null;
-      },
-  
-      navigateTo(route) {
-        this.$router.push(route);
-      },
-  
-      handleLogout() {
-        localStorage.removeItem("token");
-        this.isAuthenticated = false;
-        alert("Logged out successfully!");
-      },
+      }
     },
-    created() {
-      const token = localStorage.getItem("token");
-      this.isAuthenticated = !!token;
-      this.checkIfDesigner();
-      this.fetchCompetitions();
+    navigateTo(route) {
+      this.$router.push(route);
     },
-  };
-  </script>
+    handleLogout() {
+      localStorage.removeItem("token");
+      this.isAuthenticated = false;
+      alert("Logged out successfully!");
+    },
+  },
+  created() {
+    const token = localStorage.getItem("token");
+    this.isAuthenticated = !!token;
+    this.checkIfDesigner();
+    this.fetchCompetitions();
+  },
+};
+</script>
           
-  <style scoped>
+<style scoped>
   .header-menu {
     display: flex;
     align-items: center;
@@ -484,4 +498,4 @@
   .join-btn:hover {
     background-color: #218838;
   }
-  </style>
+</style>
