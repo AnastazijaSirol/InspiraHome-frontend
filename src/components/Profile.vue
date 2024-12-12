@@ -1,3 +1,4 @@
+
 <template>
   <div class="profile-page">
     <div class="header-menu">
@@ -219,11 +220,6 @@ export default {
         alert('Image uploaded successfully!');
         this.closeUploadModal(); 
         console.log('Uploaded image URL:', response.data.imageUrl);
-
-        this.likedImages.push({
-          id: response.data.added.id,
-          imageUrl: response.data.imageUrl,
-        });
       } catch (error) {
         console.error('Error uploading image:', error);
         alert('Failed to upload image. Please try again.');
