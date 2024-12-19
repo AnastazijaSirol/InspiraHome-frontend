@@ -68,7 +68,7 @@
 
 <script>
 import axios from 'axios';
-
+const VUE_APP_API_URL = process.env.VUE_APP_API_URL;
 export default {
   name: 'GroupChatsPage',
   data() {
@@ -90,9 +90,10 @@ export default {
     async fetchGroupChats() {
       const token = localStorage.getItem('token');
       try {
-        const response = await axios.get('http://localhost:3000/api/groups', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await axios.get(
+          `${VUE_APP_API_URL}/groups`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
         this.groupChats = response.data;
       } catch (error) {
         console.error('Error fetching group chats:', error);
@@ -113,7 +114,7 @@ export default {
       const token = localStorage.getItem('token');
       try {
         const response = await axios.post(
-          'http://localhost:3000/api/groups',
+          `${VUE_APP_API_URL}/groups`,
           { name: this.newGroupName },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -141,7 +142,7 @@ export default {
       const token = localStorage.getItem('token');
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/groups/${this.activeChat.id}/messages`,
+          `${VUE_APP_API_URL}/groups/${this.activeChat.id}/messages`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         this.messages = response.data;
@@ -156,7 +157,7 @@ export default {
       if (this.newMessage.trim() === '') return;
       try {
         const response = await axios.post(
-          `http://localhost:3000/api/groups/${this.activeChat.id}/messages`,
+          `${VUE_APP_API_URL}/groups/${this.activeChat.id}/messages`,
           { text: this.newMessage },
           { headers: { Authorization: `Bearer ${token}` } }
         );
