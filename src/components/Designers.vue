@@ -68,7 +68,7 @@
 
 <script>
 import axios from "axios";
-
+const VUE_APP_API_URL = process.env.VUE_APP_API_URL;
 export default {
   name: "DesignersPage",
   data() {
@@ -79,7 +79,7 @@ export default {
       selectedDesigner: null,
       designerImages: [],
       currentImageIndex: 0,
-      emailLink: '', 
+      emailLink: "", 
     };
   },
   async created() {
@@ -101,11 +101,14 @@ export default {
     },
     async fetchDesigners(token) {
       try {
-        const response = await axios.get("http://localhost:3000/api/designers", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(
+          `${VUE_APP_API_URL}/designers`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         this.designers = response.data;
       } catch (error) {
         console.error("Error fetching designers:", error);
@@ -122,16 +125,16 @@ export default {
       }
 
       if (designer.email) {
-        const subject = encodeURIComponent('Greetings!');
+        const subject = encodeURIComponent("Greetings!");
         this.emailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${designer.email}&su=${subject}`;
       } else {
         console.error("Designer email not available.");
-        this.emailLink = ''; 
+        this.emailLink = ""; 
       }
 
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/images/${designer.id}`,
+          `${VUE_APP_API_URL}/images/${designer.id}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -165,7 +168,7 @@ export default {
     },
     prevImage() {
       this.currentImageIndex =
-        (this.currentImageIndex - 1 + this.designerImages.length) % 
+        (this.currentImageIndex - 1 + this.designerImages.length) %
         this.designerImages.length;
     },
   },
