@@ -101,7 +101,7 @@
   
 <script>
 import axios from "axios";
-
+const VUE_APP_API_URL = process.env.VUE_APP_API_URL;
 export default {
   name: "CompetitionsPage",
   data() {
@@ -135,32 +135,42 @@ export default {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-        const response = await axios.get("http://localhost:3000/api/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `${VUE_APP_API_URL}/profile`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         this.isDesigner = response.data.isDesigner || false;
       } catch (error) {
         console.error("Error checking designer status:", error);
       }
     },
     async fetchCompetitions() {
-      try {
-        const response = await axios.get("http://localhost:3000/api/competitions");
-        const competitions = response.data;
-        for (const competition of competitions) {
-          competition.descriptions = await this.fetchDescriptions(competition.id);
-          if (competition.winner) {
-            competition.winner = await this.fetchWinnerDescription(competition.winner);
-          }
-        }
-        this.competitions = competitions;
-      } catch (error) {
-        console.error("Error fetching competitions:", error);
+  try {
+    const response = await axios.get(
+      `${VUE_APP_API_URL}/competitions`
+    );
+    const competitions = response.data;
+    
+    for (const competition of competitions) {
+      competition.descriptions = await this.fetchDescriptions(competition.id);
+      if (competition.winner) {
+        competition.winner = await this.fetchWinnerDescription(competition.winner);
       }
-    },
+    }
+    this.competitions = competitions;
+  } catch (error) {
+    console.error("Error fetching competitions:", error);
+  }
+},
+
+  
     async fetchDescriptions(competitionId) {
       try {
-        const response = await axios.get(`http://localhost:3000/api/competitions/${competitionId}/descriptions`);
+        const response = await axios.get(
+          `${VUE_APP_API_URL}/competitions/${competitionId}/descriptions`
+        );
         return response.data;
       } catch (error) {
         console.error("Error fetching descriptions:", error);
@@ -170,7 +180,9 @@ export default {
     },
     async fetchWinnerDescription(winnerId) {
       try {
-        const response = await axios.get(`http://localhost:3000/api/descriptions/${winnerId}`);
+        const response = await axios.get(
+          `${VUE_APP_API_URL}/descriptions/${winnerId}`
+        );
         return response.data;
       } catch (error) {
         console.error("Error fetching winner description:", error);
@@ -186,35 +198,39 @@ export default {
       this.joinDescription = "";
     },
     async submitJoinCompetition() {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
 
-        const data = {
-          description: this.joinDescription,
-        };
-        console.log("Sending data:", data); 
+    const data = {
+      description: this.joinDescription,
+    };
 
-        const response = await axios.post(
-          `http://localhost:3000/api/competitions/${this.competitionIdToJoin}/join`,
-          data,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        console.log(response.data); 
-        alert("You have successfully joined the competition!");
-        this.fetchCompetitions();
-        this.closeJoinModal();
-      } catch (error) {
-        const errorMessage = error.response ? error.response.data.message : error.message;
-        console.error("Error joining competition:", errorMessage);
-        alert(`Failed to join the competition: ${errorMessage}`);
+    const response = await axios.post(
+      `${VUE_APP_API_URL}/competitions/${this.competitionIdToJoin}/join`,
+      data,
+      {
+        headers: { Authorization: `Bearer ${token}` },
       }
-    },
+    );
+
+    if (response && response.data) {
+      alert("You have successfully joined the competition!");
+      this.fetchCompetitions();
+      this.closeJoinModal();
+    } else {
+      alert("Failed to join the competition.");
+    }
+  } catch (error) {
+    const errorMessage = error.response
+      ? error.response.data.message
+      : error.message;
+    console.error("Error joining competition:", errorMessage);
+    alert(`Failed to join the competition: ${errorMessage}`);
+  }
+},
 
     openAddCompetitionModal() {
       this.isAddCompetitionModalOpen = true;
@@ -237,7 +253,7 @@ export default {
       try {
         const token = localStorage.getItem("token");
         await axios.post(
-          "http://localhost:3000/api/competitions",
+          `${VUE_APP_API_URL}/competitions`,
           {
             name: this.newCompetition.name,
             date: this.newCompetition.date,
@@ -281,14 +297,18 @@ export default {
       if (this.selectedDescription) {
         try {
           const token = localStorage.getItem("token");
-          await axios.post(`http://localhost:3000/api/competitions/${this.selectedCompetition.id}/pick-winner`, {
-            winner: this.selectedDescription
-          }, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          await axios.post(
+            `${VUE_APP_API_URL}/competitions/${this.selectedCompetition.id}/pick-winner`,
+            {
+              winner: this.selectedDescription,
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
           alert("Winner selected successfully!");
           this.closePickWinnerModal();
-          this.fetchCompetitions(); 
+          this.fetchCompetitions();
         } catch (error) {
           console.error("Error selecting winner:", error);
           alert("Failed to select winner. Please try again.");
@@ -302,6 +322,7 @@ export default {
       localStorage.removeItem("token");
       this.isAuthenticated = false;
       alert("Logged out successfully!");
+      this.$router.push("/");
     },
   },
   created() {
@@ -312,7 +333,7 @@ export default {
   },
 };
 </script>
-          
+        
 <style scoped>
   .header-menu {
     display: flex;
