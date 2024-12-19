@@ -75,7 +75,7 @@
 
 <script>
 import { signup, login } from '../api';
-
+const VUE_APP_API_URL = process.env.VUE_APP_API_URL;
 export default {
   name: 'HomePage',
   data() {
@@ -146,7 +146,7 @@ export default {
         }
 
         try {
-          const response = await fetch('http://localhost:3000/api/history', {
+          const response = await fetch(`${VUE_APP_API_URL}/history`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -166,6 +166,7 @@ export default {
             alert('Failed to save selection.');
           }
         } catch (error) {
+          console.error('Error saving selection:', error);
           alert('Error saving selection.');
         }
       } else {
