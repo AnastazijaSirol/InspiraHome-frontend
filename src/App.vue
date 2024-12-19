@@ -14,6 +14,7 @@
 </template>
 
 <script>
+const VUE_APP_API_URL = process.env.VUE_APP_API_URL;
 export default {
   data() {
     return {
@@ -27,6 +28,7 @@ export default {
     };
   },
   mounted() {
+    console.log('VUE_APP_API_URL:', VUE_APP_API_URL);
     this.intervalId = setInterval(() => {
       this.currentBackgroundIndex = (this.currentBackgroundIndex + 1) % this.backgrounds.length;
     }, 3000);
