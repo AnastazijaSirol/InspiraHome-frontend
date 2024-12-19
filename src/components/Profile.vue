@@ -130,7 +130,7 @@
 
 <script>
 import axios from 'axios';
-
+const VUE_APP_API_URL = process.env.VUE_APP_API_URL;
 export default {
   name: 'ProfilePage',
   data() {
@@ -153,6 +153,7 @@ export default {
     };
   },
   async created() {
+    console.log(VUE_APP_API_URL)
     await this.fetchProfileData();
     await this.fetchLikedImages();
     await this.fetchSearchHistory();
@@ -161,7 +162,7 @@ export default {
     async fetchProfileData() {
       const token = localStorage.getItem('token');
       try {
-        const response = await axios.get('http://localhost:3000/api/profile', {
+        const response = await axios.get(`${VUE_APP_API_URL}/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.username = response.data.username;
@@ -205,7 +206,7 @@ export default {
       const token = localStorage.getItem('token');
       try {
         const response = await axios.post(
-          'http://localhost:3000/api/upload',
+          `${VUE_APP_API_URL}/upload`,
           {
             file: this.selectedFile.base64,
             filename: this.selectedFile.name,
@@ -229,7 +230,7 @@ export default {
     async fetchUploadedImages() {
       const token = localStorage.getItem('token');
       try {
-        const response = await axios.get('http://localhost:3000/api/uploaded-images', {
+        const response = await axios.get(`${VUE_APP_API_URL}/uploaded-images`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.uploadedImages = response.data;
@@ -238,10 +239,12 @@ export default {
         alert('Failed to load uploaded images.');
       }
     },
+
     openUploadedImagesModal() {
       this.isUploadedImagesModalOpen = true;
       this.fetchUploadedImages(); 
     },
+
     closeUploadedImagesModal() {
       this.isUploadedImagesModalOpen = false;
       this.uploadedImages = [];
@@ -250,7 +253,7 @@ export default {
     async fetchLikedImages() {
       const token = localStorage.getItem('token');
       try {
-        const response = await axios.get('http://localhost:3000/api/likes', {
+        const response = await axios.get(`${VUE_APP_API_URL}/likes`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.likedImages = response.data.map(like => ({
@@ -263,10 +266,11 @@ export default {
         alert('Failed to load liked images.');
       }
     },
+
     async fetchSearchHistory() {
       const token = localStorage.getItem('token');
       try {
-        const response = await axios.get('http://localhost:3000/api/history', {
+        const response = await axios.get(`${VUE_APP_API_URL}/history`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.history = response.data.map(item => ({
@@ -281,16 +285,20 @@ export default {
         alert('Failed to load search history.');
       }
     },
+
     formatDate(dateTime) {
       const date = new Date(dateTime);
       return date.toLocaleString();
     },
+
     openHistoryModal() {
       this.isHistoryModalOpen = true;   
     },
+
     closeHistoryModal() {
       this.isHistoryModalOpen = false;
     },
+
     sortHistory() {
       if (this.sortOrder === 'asc') {
         this.history.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
@@ -298,19 +306,21 @@ export default {
         this.history.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
       }
     },
+
     enableEditing() {
       this.isEditing = true;
     },
+
     cancelEditing() {
       this.isEditing = false;
       this.fetchProfileData();
     },
-    
+
     async saveChanges() {
       const token = localStorage.getItem('token');
       try {
         await axios.put(
-          'http://localhost:3000/api/profile', 
+          `${import.meta.env.VUE_APP_API_URL}/api/profile`, 
           { username: this.username }, 
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -326,7 +336,7 @@ export default {
     async unlikeImage(likeId) { 
       const token = localStorage.getItem('token');
       try {
-        await axios.delete(`http://localhost:3000/api/likes/${likeId}`, {
+        await axios.delete(`${import.meta.env.VUE_APP_API_URL}/api/likes/${likeId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.likedImages = this.likedImages.filter(image => image.id !== likeId);
@@ -336,6 +346,7 @@ export default {
         alert('Failed to unlike image.');
       }
     },
+
     async toggleDesigner() {
       if (!confirm('By becoming a Designer, your profile will be public and this action cannot be undone. Proceed?')) {
         return;
@@ -343,7 +354,7 @@ export default {
       try {
         const token = localStorage.getItem('token');
         await axios.put(
-          'http://localhost:3000/api/profile/designer',
+          `${import.meta.env.VUE_APP_API_URL}/api/profile/designer`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -354,27 +365,32 @@ export default {
         alert('Failed to set designer status.');
       }
     },
+
     openImage(imageUrl) {
       this.currentImageUrl = imageUrl;
       this.isImageModalOpen = true;
     },
+
     closeModal() {
       this.isImageModalOpen = false;
       this.currentImageUrl = null;
     },
+
     handleLogout() {
       localStorage.removeItem('token');
       this.isAuthenticated = false;
       alert('Logged out successfully!');
       this.$router.push('/');
     },
+
     navigateTo(route) {
       this.$router.push(route);
     },
+
     async deleteHistory(dateTime) {
       const token = localStorage.getItem('token');
       try {
-        await axios.delete(`http://localhost:3000/api/history/${dateTime}`, {
+        await axios.delete(`${import.meta.env.VUE_APP_API_URL}/api/history/${dateTime}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.history = this.history.filter(item => item.dateTime !== dateTime);
