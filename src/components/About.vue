@@ -51,6 +51,7 @@
 
 <script>
 import axios from 'axios';
+const VUE_APP_API_URL = process.env.VUE_APP_API_URL;
 
 export default {
   name: 'AboutPage',
@@ -76,7 +77,7 @@ export default {
       this.isLiked = false;
       try {
         const token = localStorage.getItem('token');
-        const generateResponse = await fetch(`http://localhost:3000/api/images`, {
+        const generateResponse = await fetch(`${VUE_APP_API_URL}/images`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -105,7 +106,7 @@ export default {
     async checkIfLiked(imageUrl) {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:3000/api/likes/check`, {
+        const response = await axios.get(`${VUE_APP_API_URL}/likes`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -113,12 +114,13 @@ export default {
             imageUrl,
           },
         });
-
+        console.log(response);
         this.isLiked = response.data.liked;
       } catch (error) {
         console.error('Error checking if liked:', error);
       }
     },
+
 
     async downloadImage() {
       try {
@@ -170,7 +172,7 @@ export default {
       };
 
       try {
-        const response = await axios.post('http://localhost:3000/api/likes', likePayload, {
+        const response = await axios.post(`${VUE_APP_API_URL}/likes`, likePayload, {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
