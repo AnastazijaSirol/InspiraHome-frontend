@@ -39,8 +39,8 @@
 </template>
 
 <script>
-import axios from 'axios';
-
+import axios from "axios";
+const VUE_APP_API_URL = process.env.VUE_APP_API_URL;
 export default {
   name: "QuizPage",
   data() {
@@ -137,7 +137,7 @@ export default {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://localhost:3000/api/get-quiz-result",
+          `${VUE_APP_API_URL}/get-quiz-result`,
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -149,6 +149,7 @@ export default {
         }
       } catch (error) {
         console.error("Error fetching quiz result:", error);
+        alert("Failed to fetch quiz result.");
       }
     },
     selectAnswer(answerIndex) {
@@ -174,7 +175,7 @@ export default {
       try {
         const token = localStorage.getItem("token");
         await axios.post(
-          "http://localhost:3000/api/save-quiz-result",
+          `${VUE_APP_API_URL}/save-quiz-result`,
           { style },
           {
             headers: {
@@ -196,7 +197,6 @@ export default {
   }
 };
 </script>
-
 
 <style scoped>
   .header-menu {
