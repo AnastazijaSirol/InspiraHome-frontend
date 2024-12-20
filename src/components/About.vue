@@ -124,17 +124,23 @@ export default {
 
     async downloadImage() {
       try {
-        const response = await axios.get(this.image, { responseType: 'blob' });
-        const url = URL.createObjectURL(new Blob([response.data]));
+        let imageUrl = this.image;
+        if (imageUrl.startsWith('http://')) {
+          imageUrl = imageUrl.replace('http://', 'https://');
+        }
+        
+        const response = await axios.get(imageUrl, { responseType: 'blob' });
 
+        const url = URL.createObjectURL(new Blob([response.data]));
+    
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', 'inspiration.png');
-
+        link.setAttribute('download', 'inspiration.png');  
+    
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
+    
         URL.revokeObjectURL(url);
       } catch (error) {
         console.error('Failed to download image:', error);
