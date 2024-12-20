@@ -320,7 +320,7 @@ export default {
       const token = localStorage.getItem('token');
       try {
         await axios.put(
-          `${import.meta.env.VUE_APP_API_URL}/api/profile`, 
+          `${VUE_APP_API_URL}/api/profile`, 
           { username: this.username }, 
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -336,7 +336,7 @@ export default {
     async unlikeImage(likeId) { 
       const token = localStorage.getItem('token');
       try {
-        await axios.delete(`${import.meta.env.VUE_APP_API_URL}/api/likes/${likeId}`, {
+        await axios.delete(`${VUE_APP_API_URL}/api/likes/${likeId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.likedImages = this.likedImages.filter(image => image.id !== likeId);
@@ -354,7 +354,7 @@ export default {
       try {
         const token = localStorage.getItem('token');
         await axios.put(
-          `${import.meta.env.VUE_APP_API_URL}/api/profile/designer`,
+          `${VUE_APP_API_URL}/api/profile/designer`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -390,7 +390,7 @@ export default {
     async deleteHistory(dateTime) {
       const token = localStorage.getItem('token');
       try {
-        await axios.delete(`${import.meta.env.VUE_APP_API_URL}/api/history/${dateTime}`, {
+        await axios.delete(`${VUE_APP_API_URL}/api/history/${dateTime}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.history = this.history.filter(item => item.dateTime !== dateTime);
