@@ -147,24 +147,23 @@ export default {
       }
     },
     async fetchCompetitions() {
-  try {
-    const response = await axios.get(
-      `${VUE_APP_API_URL}/competitions`
-    );
-    const competitions = response.data;
-    
-    for (const competition of competitions) {
-      competition.descriptions = await this.fetchDescriptions(competition.id);
-      if (competition.winner) {
-        competition.winner = await this.fetchWinnerDescription(competition.winner);
+      try {
+        const response = await axios.get(
+          `${VUE_APP_API_URL}/competitions`
+        );
+        const competitions = response.data;
+        
+        for (const competition of competitions) {
+          competition.descriptions = await this.fetchDescriptions(competition.id);
+          if (competition.winner) {
+            competition.winner = await this.fetchWinnerDescription(competition.winner);
+          }
+        }
+        this.competitions = competitions;
+      } catch (error) {
+        console.error("Error fetching competitions:", error);
       }
-    }
-    this.competitions = competitions;
-  } catch (error) {
-    console.error("Error fetching competitions:", error);
-  }
-},
-
+    },
   
     async fetchDescriptions(competitionId) {
       try {
@@ -178,6 +177,7 @@ export default {
         return [];
       }
     },
+    
     async fetchWinnerDescription(winnerId) {
       try {
         const response = await axios.get(
@@ -189,56 +189,61 @@ export default {
         return null;
       }
     },
+    
     openJoinModal(competitionId) {
       this.competitionIdToJoin = competitionId;
       this.isJoinModalOpen = true;
     },
+    
     closeJoinModal() {
       this.isJoinModalOpen = false;
       this.joinDescription = "";
     },
+    
     async submitJoinCompetition() {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-
-    const data = {
-      description: this.joinDescription,
-    };
-
-    const response = await axios.post(
-      `${VUE_APP_API_URL}/competitions/${this.competitionIdToJoin}/join`,
-      data,
-      {
-        headers: { Authorization: `Bearer ${token}` },
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
+    
+        const data = {
+          description: this.joinDescription,
+        };
+    
+        const response = await axios.post(
+          `${VUE_APP_API_URL}/competitions/${this.competitionIdToJoin}/join`,
+          data,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+    
+        if (response && response.data) {
+          alert("You have successfully joined the competition!");
+          this.fetchCompetitions();
+          this.closeJoinModal();
+        } else {
+          alert("Failed to join the competition.");
+        }
+      } catch (error) {
+        const errorMessage = error.response
+          ? error.response.data.message
+          : error.message;
+        console.error("Error joining competition:", errorMessage);
+        alert(`Failed to join the competition: ${errorMessage}`);
       }
-    );
-
-    if (response && response.data) {
-      alert("You have successfully joined the competition!");
-      this.fetchCompetitions();
-      this.closeJoinModal();
-    } else {
-      alert("Failed to join the competition.");
-    }
-  } catch (error) {
-    const errorMessage = error.response
-      ? error.response.data.message
-      : error.message;
-    console.error("Error joining competition:", errorMessage);
-    alert(`Failed to join the competition: ${errorMessage}`);
-  }
-},
+    },
 
     openAddCompetitionModal() {
       this.isAddCompetitionModalOpen = true;
     },
+    
     closeAddCompetitionModal() {
       this.isAddCompetitionModalOpen = false;
       this.newCompetition = { name: "", date: "", image: null };
     },
+    
     handleImageUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -249,6 +254,7 @@ export default {
         reader.readAsDataURL(file);
       }
     },
+    
     async submitCompetition() {
       try {
         const token = localStorage.getItem("token");
@@ -271,28 +277,34 @@ export default {
         alert("Failed to add competition. Please try again.");
       }
     },
+    
     formatDate(dateString) {
       const options = { year: "numeric", month: "2-digit", day: "2-digit" };
       const date = new Date(dateString);
       return date.toLocaleDateString(undefined, options);
     },
+    
     openImageModal(image) {
       this.selectedImage = image;
       this.isImageModalOpen = true;
     },
+    
     closeImageModal() {
       this.isImageModalOpen = false;
       this.selectedImage = null;
     },
+    
     openPickWinnerModal(competition) {
       this.selectedCompetition = competition;
       this.isPickWinnerModalOpen = true;
     },
+    
     closePickWinnerModal() {
       this.isPickWinnerModalOpen = false;
       this.selectedCompetition = null;
       this.selectedDescription = null;
     },
+    
     async submitWinner() {
       if (this.selectedDescription) {
         try {
@@ -315,9 +327,11 @@ export default {
         }
       }
     },
+    
     navigateTo(route) {
       this.$router.push(route);
     },
+    
     handleLogout() {
       localStorage.removeItem("token");
       this.isAuthenticated = false;
@@ -325,6 +339,7 @@ export default {
       this.$router.push("/");
     },
   },
+  
   created() {
     const token = localStorage.getItem("token");
     this.isAuthenticated = !!token;
