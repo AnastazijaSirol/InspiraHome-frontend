@@ -7,7 +7,6 @@
         <button @click="navigateTo('/profile')">Profile</button>
         <button @click="navigateTo('/group-chats')">Group Chats</button>
         <button @click="navigateTo('/designers')">Designers</button>
-        <button @click="navigateTo('/competitions')">Competitions</button>
         <button @click="navigateTo('/quiz')">Quiz</button>
       </div>
     </div>
