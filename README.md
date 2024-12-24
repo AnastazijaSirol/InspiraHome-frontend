@@ -11,7 +11,7 @@
 [ntankovic.unipu.hr](ntakovic.unipu.hr)
 
 ### Funkcionalnosti
-#### Korisnici:
+#### Korisnik:
 1. Registracija/prijava
 2. Odabir promt-a za generiranje slike
 3. Download-anje slike
@@ -29,7 +29,7 @@
 15. Kontaktiranje designera
 16. Rješavanje quiz-a 
 
-#### Administrator:
+#### Designer:
 1. Registracija/prijava
 2. Odabir promt-a za generiranje slike
 3. Download-anje slike
