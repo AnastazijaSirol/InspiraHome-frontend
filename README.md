@@ -56,5 +56,5 @@
 - email: anastazijasirol@gmail.com
 - lozinka: 123456789
 
-#### Javni URL: https://inspirahome-waproject.netlify.app/
+#### Javni URL: https://wa-inspirahome.netlify.app/
 #### YouTube: https://youtu.be/eVjbWvuoYIA
